@@ -52,6 +52,7 @@ class Character(pg.sprite.Sprite):
 		self.battle_deck = None
 		self.adventure_deck = None
 		self.counter = 0
+		self.meelee_dist = calc_relative_size(.2)
 		self.calc_status()
 
 	def set_deck(self , deck , adventure):
@@ -360,4 +361,3 @@ class Character(pg.sprite.Sprite):
 		:return:
 		"""
 		self.change_hp(value)
-		
