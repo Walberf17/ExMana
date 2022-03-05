@@ -24,6 +24,7 @@ class Character(pg.sprite.Sprite):
 			self.sprite_grid = self.images.get_size()[0] / self.sprite_size[0] , self.images.get_size()[1] / \
 			                   self.sprite_size[1]
 			self.image_index = [0 , 0]
+			print(self.images.get_size())
 		else:
 			self.images = None
 			self.sprite_size = None
@@ -42,7 +43,17 @@ class Character(pg.sprite.Sprite):
 		self.will = 5  # default magical attack and how strong controls mana
 		self.wisdow = 5  # default magical resilience
 		self.status = {}  # status to calc in game
-		self.equipaments = {}
+		self.equipaments = {
+			"head"      : None,
+			"r_hand"    : None,
+			"l_hand"    : None,
+			"chest"     : None,
+			"legs"      : None,
+			"r_finger"  : None,
+			"l_finger"  : None,
+			"neck"      : None,
+			"hands"     : None
+		}
 		self.bag = {}
 		self.status = {}
 		self.dominant_hand = "r_hand"
@@ -78,6 +89,20 @@ class Character(pg.sprite.Sprite):
 		init_y = self.rect.top + (h * j)
 		return pg.Rect(init_x , init_y , w , h)
 
+	def create_rect_to_draw_in_status(self , size):
+		"""
+		creates a rect to draw the correct sprite
+		:return: None
+		"""
+		i , j = self.image_index
+		n_w , n_h = size
+		max_i , max_j = self.sprite_grid
+		w = n_w/max_i
+		h = n_h/max_j
+		init_x = self.rect.left + (w * i)
+		init_y = self.rect.top + (h * j)
+		return pg.Rect(init_x , init_y , w , h)
+
 	def draw(self , screen_to_draw):
 		"""
 		draw itself on the given surface
@@ -88,6 +113,17 @@ class Character(pg.sprite.Sprite):
 			screen_to_draw.blit(self.images , self.rect , self.create_rect_to_draw())
 		else:  # draw a rect to debug
 			pg.draw.rect(screen_to_draw , "red" , self.rect)
+
+	def draw_equip_screen(self , screen_to_draw , screen_to_draw_rect):
+		size = pg.Vector2(screen_to_draw_rect.size).elementwise()*(2 ,.5)
+		image = pg.transform.scale(self.images , size)
+		new_rect = image.get_rect()
+		new_clamp_rect = self.create_rect_to_draw_in_status(size)
+		new_rect.size = new_clamp_rect.size
+		new_rect.center = screen_to_draw_rect.center
+		pg.draw.rect(screen_to_draw , "red" ,new_rect , 4)
+		screen_to_draw.blit(image , new_rect , new_clamp_rect)
+
 
 	def update(self):
 		"""
@@ -183,26 +219,25 @@ class Character(pg.sprite.Sprite):
 		will = self.will
 		wisdow = self.wisdow
 		for _ , item in self.equipaments.items():
-			# print(item)
-			dict_item = EQUIPAMENTS.get(item)
-			# print(dict_item)
-			modifiers = dict_item.get("modifiers")
-			for modifier , value in modifiers.items():
-				match modifier:
-					case "velocity":
-						velocity += value
-					case "hp":
-						hp += value
-					case "strength":
-						strength += value
-					case "resilience":
-						resilience += value
-					case "mana":
-						mana += value
-					case "will":
-						will += value
-					case "wisdow":
-						wisdow += value
+			if item is not None:
+				dict_item = EQUIPAMENTS.get(item)
+				modifiers = dict_item.get("modifiers")
+				for modifier , value in modifiers.items():
+					match modifier:
+						case "velocity":
+							velocity += value
+						case "hp":
+							hp += value
+						case "strength":
+							strength += value
+						case "resilience":
+							resilience += value
+						case "mana":
+							mana += value
+						case "will":
+							will += value
+						case "wisdow":
+							wisdow += value
 		self.status = {
 			"velocity": velocity ,
 			"hp": hp ,

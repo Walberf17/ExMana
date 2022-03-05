@@ -88,7 +88,7 @@ def calc_relative_size(size , rect = screen_rect):
 	"""
 	# size = list(size)
 	match size:
-		case int(x):
+		case int(x)|float(x):
 			return x * rect.w
 		case [x , y]:
 			a = x * rect.w

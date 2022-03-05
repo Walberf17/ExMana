@@ -259,7 +259,17 @@ class Scene:
 	def stop(self):
 		self.running = 0
 
+class EquipScene(Scene):
+	def __init__(self , screen_to_draw , dicts_to_do = None , background = "light blue" , FPS = 45):
+		super().__init__(screen_to_draw , dicts_to_do, background , FPS)
+
+	def draw_handler(self):
+
+		self.screen.fill(self.background)
+		for player in players_group:
+			player.draw_equip_screen(self.screen , screen_rect)
+		pg.display.update()
 # run
 if __name__=="__main__":
-	main_menu = Scene(screen)
+	main_menu = EquipScene(screen)
 	main_menu.run()
