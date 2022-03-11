@@ -9,7 +9,7 @@ from variables_and_definitions import *
 
 
 class Button(pg.sprite.Sprite):
-	def __init__(self , relative_size: tuple|list , action: str = "None" , image: str = None , txt = None , action_on_click = False , colors = ['orange' , 'orange4' , 'orange2']):
+	def __init__(self , relative_size: tuple|list , action: str = None , image: str = None , txt = None , action_on_click = False , colors = ['orange' , 'orange4' , 'orange2']):
 		"""
 		It creates a rect in the screen, and does a action when interacted. If calls update, when hoovered it slightly change the color.
 		:param relative_size: a list or tuple with float numbers from 0 to 1.0
@@ -55,8 +55,6 @@ class Button(pg.sprite.Sprite):
 		:param event: pg.Event
 		:return: boo
 		"""
-
-
 		if self.rect.collidepoint(event.pos):
 			if button_pressed:
 				ev_btn = button_pressed
@@ -126,7 +124,8 @@ class Button(pg.sprite.Sprite):
 		Do whatever the action set to do.
 		:return: None
 		"""
-		eval(self.action)
+		if self.action:
+			eval(self.action)
 				
 	def update(self):
 		"""
@@ -142,3 +141,76 @@ class Button(pg.sprite.Sprite):
 					self.color = 2
 			else:
 				self.color = 0
+
+		# if self.clicked:
+		# 	self.rect.move_ip(pg.mouse.get_rel())
+
+class SelectionBox(pg.sprite.Sprite):
+	def __init__(self , rect , image: str = None , arguments: str = None , drops = None):
+		super().__init__()
+		self.rect = pg.Rect(calc_relative_size(rect))
+		self.image = None
+		if image:
+			self.image = pg.image.load(image).convert()
+
+		self.arguments = arguments
+		self.clicked = False
+		if drops:
+			self.drops = drops
+		else:
+			self.drops = []
+		self.second_rect = None
+		selection_group.add(self)
+
+	def draw(self , screen_to_draw):
+		if self.image:
+			screen_to_draw.blit(self.image , self.rect)
+		else:
+			pg.draw.rect(screen_to_draw , "red" , self.rect , 5)
+
+		if self.clicked:
+			pg.draw.rect(screen_to_draw , "blue" , self.second_rect , 7)
+
+	def click_down(self , event):
+		if self.rect.collidepoint(event.pos):
+			self.clicked = True
+			self.second_rect = self.rect.copy()
+			return True
+
+	def move(self):
+		if self.clicked:
+			mouse_move = pg.mouse.get_rel()
+			self.second_rect.move_ip(mouse_move)
+
+	def click_up(self , event):
+		if self.clicked:
+			self.clicked = False
+			for box in self.drops:
+				if self.second_rect.colliderect(box.rect):
+					box.do_drop_action(self.arguments)
+					return True
+				self.second_rect = None
+				return True
+
+class DropBox(Button):
+
+	def __init__(self , relative_size: tuple|list , drop_action: str = None , arguments: str = None , action: str = None , image: str = None , txt = None , action_on_click = False , colors = ['orange' , 'orange4' , 'orange2']):
+		"""
+		It creates a rect in the screen, and does a action when interacted. If calls update, when hoovered it slightly change the color.
+		:param relative_size: a list or tuple with float numbers from 0 to 1.0
+		:param action: str with the action to do.
+		:param image: str with path to the image
+		:param txt: str with what should it show
+		:param action_on_click: bool
+		:param colors: list of pg.color
+		"""
+		super().__init__( relative_size , action, image , txt, action_on_click , colors)
+		self.drop_action = drop_action
+		self.arguments = arguments
+
+	def do_drop_action(self , arguments):
+		if self.drop_action:
+			if self.arguments:
+				eval(f'{self.drop_action}({self.arguments} , {arguments})')
+			else:
+				eval(f'{self.drop_action}({arguments})')

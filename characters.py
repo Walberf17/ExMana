@@ -3,6 +3,8 @@ This is a internal class, a class that will be a base for other.
 
 This class will create a character and give it default actions.
 """
+import random
+
 from variables_and_definitions import *
 
 
@@ -18,6 +20,7 @@ class Character(pg.sprite.Sprite):
 		super().__init__()
 
 		images , sprite_size = CHARACTER_IMAGES_DICT.get(images_idx)
+		sight = [60,100]
 		if images:
 			self.images = pg.image.load(IMAGES_PATH + images)
 			self.sprite_size = sprite_size
@@ -30,6 +33,10 @@ class Character(pg.sprite.Sprite):
 			self.sprite_size = None
 			self.sprite_grid = None
 			self.image_index = None
+		self.sex = random.choice(["Male","Female"])
+		self.sight = random.randrange(sight[0] , sight[1])/10
+		if self.sex == "Female":
+			self.sight *= .9
 		self.rect = pg.Rect(0 , 0 , 100 , 100)
 		self.max_mana = 10
 		self.max_hp = 10
@@ -49,10 +56,10 @@ class Character(pg.sprite.Sprite):
 			"l_hand"    : None,
 			"chest"     : None,
 			"legs"      : None,
+			"feets"     : None,
 			"r_finger"  : None,
 			"l_finger"  : None,
 			"neck"      : None,
-			"hands"     : None
 		}
 		self.bag = {}
 		self.status = {}
@@ -120,10 +127,9 @@ class Character(pg.sprite.Sprite):
 		new_rect = image.get_rect()
 		new_clamp_rect = self.create_rect_to_draw_in_status(size)
 		new_rect.size = new_clamp_rect.size
-		new_rect.center = screen_to_draw_rect.center
+		new_rect.midleft = screen_to_draw_rect.center
 		pg.draw.rect(screen_to_draw , "red" ,new_rect , 4)
 		screen_to_draw.blit(image , new_rect , new_clamp_rect)
-
 
 	def update(self):
 		"""
@@ -262,7 +268,7 @@ class Character(pg.sprite.Sprite):
 			self.unequip_item("l_hand")
 			self.unequip_item("r_hand")
 		if place == "hand":
-			if self.dominant_hand in self.equipaments:
+			if self.equipaments.get(self.dominant_hand):
 				place = self.ohter_hand
 			else:
 				place = self.dominant_hand
@@ -363,7 +369,7 @@ class Character(pg.sprite.Sprite):
 		:param value: int
 		:return: None
 		"""
-		self.change_hp(value)
+		self.change_hp(4*value)
 
 	def gravity_damage(self , value: int = -2):
 		"""

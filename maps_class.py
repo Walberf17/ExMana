@@ -9,7 +9,7 @@ class MapGrid(Grid):
 		self.secret_items = {}
 		self.name = name
 		try:
-			self.original_image = pg.image.load(f'{images_path}/Maps/{self.name}.png').convert()
+			self.original_image = pg.image.load(f'{IMAGES_PATH}Maps/{self.name}.png').convert()
 			self.image = pg.transform.scale(self.original_image , [self.rect.w , self.rect.h])
 		except FileNotFoundError:
 			self.original_image = None

@@ -16,13 +16,37 @@ maps_group = set()
 cards_group = pg.sprite.Group()
 items_group = pg.sprite.Group()
 buttons_group = pg.sprite.Group()
+buttons_main_scene = pg.sprite.Group()
+buttons_equip_scene = pg.sprite.Group()
+selection_group = pg.sprite.Group()
 
 ######## Fonts for texts
 font_size = int(screen_rect.h * .1)
 main_menu_font = pg.font.SysFont("Arial" , font_size , False , True)
 
 ######## Sets of things
-SCENCES = ["Main Menu" , "Main Adventure" , "Main Battle" , "Items Menu" , "Habilities Menu" , "Testes"]
+SCENES = {"Main Menu": None ,
+           "Main Adventure": None ,
+           "Main Battle": None ,
+           "Items Menu": None ,
+           "Habilities Menu": None ,
+           "Testes": None}
+buttons_dict = {
+	"equip_scene": {
+"head_btn" : [[0.1975 , 0.02375 , 0.1375 , 0.175], "unequip_item('head)"],
+"neck_btn" : [[0.22125 , 0.21125 , 0.0875 , 0.0875], "unequip_item('neck')"],
+"chest_btn1" : [[0.1625 , 0.30375 , 0.2125 , 0.2875], "unequip_item('chest')"],
+"chest_btn2" : [[0.08625 , 0.32 , 0.05 , 0.225], "unequip_item('chest')"],
+"chest_btn3" : [[0.4 , 0.315 , 0.05 , 0.2375], "unequip_item('chest')"],
+"l_finger_btn" : [[0.45875 , 0.53125 , 0.0375 , 0.05], "unequip_item('l_finger')"],
+"r_finger_btn" : [[0.03625 , 0.52625 , 0.0375 , 0.05], "unequip_item('r_finger')"],
+"r_hand_btn" : [[-0.03625 , 0.59 , 0.175 , 0.2], "unequip_item('r_hand')"],
+"legs_btn" : [[0.21 , 0.6 , 0.125 , 0.2875], "unequip_item('legs')"],
+"l_hand_btn" : [[0.39875 , 0.58875 , 0.175 , 0.2], "unequip_item('l_hand')"],
+"feet_btn" : [[0.1475 , 0.89125 , 0.25 , 0.075], "unequip_item('feet')"],
+	}
+}
+
 
 # for images in general
 IMAGES_PATH = './Images/'
@@ -62,9 +86,10 @@ effect_interations = [
 
 ######## dicts
 scene_test_dict = {
-	"draw": [text_boxes_group , monsters_group , players_group , cards_group ,maps_group, items_group , buttons_group] ,
-	"click_down": [buttons_group] ,
-	"update": [buttons_group , players_group]
+	"draw": [text_boxes_group , monsters_group ,selection_group, players_group , cards_group ,maps_group, items_group , buttons_group] ,
+	"click_down": [buttons_group , selection_group] ,
+	"update": [buttons_group , players_group , selection_group],
+	"move": [buttons_group , selection_group]
 }
 
 EQUIPAMENTS = {
@@ -78,6 +103,10 @@ EQUIPAMENTS = {
 }}
 
 ######## Definitions
+
+def create_scene(name , obj):
+	SCENES[name] = obj
+
 
 def calc_relative_size(size , rect = screen_rect):
 	"""
@@ -102,3 +131,11 @@ def calc_relative_size(size , rect = screen_rect):
 			return [a , b , c , d]
 		case _:
 			raise TypeError
+
+def equip_item(item , place):
+	for player in players_group:
+		player.equip_item(item , place)
+
+def unequip_item(place):
+	for player in players_group:
+		player.unequip_item(place)

@@ -5,6 +5,7 @@ default pygame template
 # import things
 import pygame as pg , sys
 from variables_and_definitions import *
+from buttons import Button
 
 # create scene
 pg.init()
@@ -41,7 +42,7 @@ class Scene:
 		If no click_up is given , it will save the first object clicked
 	and will click up only that object
 	"""
-	def __init__(self , screen_to_draw , dicts_to_do = None , background = "light blue" , FPS = 45):
+	def __init__(self , screen_to_draw = screen , dicts_to_do = None , background = "light blue" , FPS = 45):
 		"""
 		creates a scene object that has its own main loop.
 
@@ -144,6 +145,7 @@ class Scene:
 		Change if needed
 		
 		"""
+		pg.mouse.get_rel()  # for smooth movement
 		for c_list in self.to_click_down:
 			for obj in c_list:
 				if obj.click_down(event):
@@ -201,6 +203,7 @@ class Scene:
 		calls --> obj.key_down(event)
 		
 		"""
+		pg.mouse.get_rel()  # for smooth movement
 		for c_list in self.to_key_down:
 			for obj in c_list:
 				obj.key_down(event)
@@ -223,6 +226,7 @@ class Scene:
 		Loops throught self.to_update and 
 		calls --> obj.update()
 		"""
+		# pg.mouse.get_rel()
 		for c_list in self.to_update:
 			for obj in c_list:
 				obj.update()
@@ -234,6 +238,7 @@ class Scene:
 		Loops throught self.to_move and 
 		calls --> obj.move()		
 		"""
+		# pg.mouse.get_rel()
 		for c_list in self.to_move:
 			for obj in c_list:
 				obj.move()
@@ -253,9 +258,7 @@ class Scene:
 		for c_list in self.to_draw:
 			for obj in c_list:
 				obj.draw(self.screen)
-		
-		pg.display.update()
-		
+
 	def stop(self):
 		self.running = 0
 
@@ -264,11 +267,45 @@ class EquipScene(Scene):
 		super().__init__(screen_to_draw , dicts_to_do, background , FPS)
 
 	def draw_handler(self):
-
 		self.screen.fill(self.background)
 		for player in players_group:
 			player.draw_equip_screen(self.screen , screen_rect)
-		pg.display.update()
+
+class EditScene(EquipScene):
+	def key_down_handler(self , event):
+		if event.key == pg.K_n:
+			Button([.25 , .1 , .5 , .1] , "print('ok')" , txt = "new")
+
+	def click_down_handler(self , event):
+		pg.mouse.get_rel()  # for smooth movement
+		for button in buttons_group:
+			if button.click_down_edit(event):
+				return
+		for slc in selection_group:
+			if slc.click_down(event):
+				return
+
+	def draw_handler(self):
+		self.screen.fill(self.background)
+		for player in players_group:
+			player.draw_equip_screen(self.screen , screen_rect)
+		for btn in buttons_group:
+			btn.draw(screen)
+		for slc in selection_group:
+			slc.draw(screen)
+
+	def click_up_handler(self , event):
+		for btn in buttons_group:
+			btn.click_up(event)
+
+		for slc in selection_group:
+			if slc.click_up(event):
+				return
+
+
+
+
+
 # run
 if __name__=="__main__":
 	main_menu = EquipScene(screen)
