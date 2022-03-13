@@ -29,7 +29,6 @@ class Character(pg.sprite.Sprite):
 			self.sprite_grid = self.images.get_size()[0] / self.sprite_size[0] , self.images.get_size()[1] / \
 			                   self.sprite_size[1]
 			self.image_index = [0 , 0]
-			print(self.images.get_size())
 			self.width = self.height * self.sprite_size[1] / self.sprite_size[0]
 		else:
 			self.images = None
@@ -70,7 +69,7 @@ class Character(pg.sprite.Sprite):
 		self.bag = {}
 		self.status = {}
 		self.dominant_hand = "r_hand"
-		self.ohter_hand = "l_hand"
+		self.other_hand = "l_hand"
 		self.level = 1
 		self.side_deck = None
 		self.battle_deck = None
@@ -418,3 +417,86 @@ class Character(pg.sprite.Sprite):
 		:return:
 		"""
 		self.change_hp(value)
+
+	def calc_new_size(self):
+		"""
+		Calculate the new size of the rect, to look proportional to the map
+		:return:
+		"""
+		self.rect = pg.Rect((0 , 0) , calc_proportional_size((self.width , self.height)))
+
+	def save_player(self):
+		new_dict = {
+			'height': self.height,
+			'width': self.width,
+			'sex': self.sex,
+			'sight': self.sight,
+			'meelee_dist': self.meelee_dist,
+			'max_mana': self.max_mana,
+			'max_hp': self.max_hp,
+			'velocity': self.velocity,
+			'max_time': self.max_time,
+			'time': self.time,
+			'hp': self.hp,
+			'strength': self.strength,
+			'resilience': self.resilience,
+			'mana': self.mana,
+			'will': self.will,
+			'wisdow': self.wisdow,
+			'equipaments': self.equipaments,
+			"bag" : self.bag ,
+			"dominant_hand" : self.dominant_hand ,
+			"other_hand" : self.other_hand ,
+			"level" : self.level ,
+			"counter" : self.counter ,
+		}
+
+
+	def load_player(self):
+		new_dict = {
+			'height': self.height ,
+			'width': self.width ,
+			'sex': self.sex ,
+			'sight': self.sight ,
+			'meelee_dist': self.meelee_dist ,
+			'max_mana': self.max_mana ,
+			'max_hp': self.max_hp ,
+			'velocity': self.velocity ,
+			'max_time': self.max_time ,
+			'time': self.time ,
+			'hp': self.hp ,
+			'strength': self.strength ,
+			'resilience': self.resilience ,
+			'mana': self.mana ,
+			'will': self.will ,
+			'wisdow': self.wisdow ,
+			'equipaments': self.equipaments ,
+			"bag": self.bag ,
+			"dominant_hand": self.dominant_hand ,
+			"other_hand": self.other_hand ,
+			"level": self.level ,
+			"counter": self.counter ,
+		}
+
+		self.height = new_dict.get('height')
+		self.width = new_dict.get('width')
+		self.sex = new_dict.get('sex')
+		self.sight = new_dict.get('sight')
+		self.meelee_dist = new_dict.get('meelee_dist')
+		self.max_mana = new_dict.get('max_mana')
+		self.max_hp = new_dict.get('max_hp')
+		self.velocity = new_dict.get('velocity')
+		self.max_time = new_dict.get('max_time')
+		self.time = new_dict.get('time')
+		self.hp = new_dict.get('hp')
+		self.strength = new_dict.get('strength')
+		self.resilience = new_dict.get('resilience')
+		self.mana = new_dict.get('mana')
+		self.will = new_dict.get('will')
+		self.wisdow = new_dict.get('wisdow')
+		self.equipaments = new_dict.get('equipaments')
+		self.bag = new_dict.get("bag")
+		self.dominant_hand = new_dict.get("dominant_hand")
+		self.other_hand = new_dict.get("other_hand")
+		self.level = new_dict.get("level")
+		self.counter = new_dict.get("counter")

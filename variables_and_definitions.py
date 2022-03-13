@@ -148,6 +148,11 @@ def calc_relative_size(size , rect = screen_rect):
 			raise TypeError
 
 def calc_proportional_size(old_size):
+	"""
+	Converts the size of a given object relative to the actual map
+	:param old_size: size in the same unit as the map
+	:return: new sizes proportional to the image
+	"""
 	match old_size:
 		case int(x) | float(x):
 			return map_proportion.x * x
