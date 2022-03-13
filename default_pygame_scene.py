@@ -42,7 +42,7 @@ class Scene:
 		If no click_up is given , it will save the first object clicked
 	and will click up only that object
 	"""
-	def __init__(self , screen_to_draw = screen , dicts_to_do = None , background = "light blue" , FPS = 45):
+	def __init__(self , screen_to_draw = screen , dicts_to_do = None , background = "light blue" , fps = 45):
 		"""
 		creates a scene object that has its own main loop.
 
@@ -62,7 +62,7 @@ class Scene:
 		
 		self.screen = screen_to_draw
 		self.running = 0
-		self.FPS = FPS
+		self.FPS = fps
 		self.obj_clicked = set()
 		if dicts_to_do is None:
 			dicts_to_do = {}

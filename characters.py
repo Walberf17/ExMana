@@ -19,25 +19,31 @@ class Character(pg.sprite.Sprite):
 		"""
 		super().__init__()
 
-		images , sprite_size = CHARACTER_IMAGES_DICT.get(images_idx)
+		this_character_list = CHARACTER_IMAGES_DICT.get(images_idx)
 		sight = [60,100]
-		if images:
+		self.height = random.randrange(160 , 210) / 100
+		if this_character_list:
+			images , self.sprite_size = this_character_list
 			self.images = pg.image.load(IMAGES_PATH + images)
-			self.sprite_size = sprite_size
+			# self.sprite_size = sprite_size
 			self.sprite_grid = self.images.get_size()[0] / self.sprite_size[0] , self.images.get_size()[1] / \
 			                   self.sprite_size[1]
 			self.image_index = [0 , 0]
 			print(self.images.get_size())
+			self.width = self.height * self.sprite_size[1] / self.sprite_size[0]
 		else:
 			self.images = None
 			self.sprite_size = None
 			self.sprite_grid = None
 			self.image_index = None
+			self.width = float(self.height)
+		self.rect = pg.Rect((0 , 0) , calc_proportional_size((self.width , self.height)))
 		self.sex = random.choice(["Male","Female"])
 		self.sight = random.randrange(sight[0] , sight[1])/10
 		if self.sex == "Female":
 			self.sight *= .9
-		self.rect = pg.Rect(0 , 0 , 100 , 100)
+			self.height - random.randrange(0 , 10)
+		self.meelee_dist = calc_proportional_size(self.height)
 		self.max_mana = 10
 		self.max_hp = 10
 		self.velocity = 5
@@ -70,7 +76,7 @@ class Character(pg.sprite.Sprite):
 		self.battle_deck = None
 		self.adventure_deck = None
 		self.counter = 0
-		self.meelee_dist = calc_relative_size(.2)
+		print(self.height , self.rect)
 		self.calc_status()
 
 	def set_deck(self , deck , adventure):
@@ -120,6 +126,16 @@ class Character(pg.sprite.Sprite):
 			screen_to_draw.blit(self.images , self.rect , self.create_rect_to_draw())
 		else:  # draw a rect to debug
 			pg.draw.rect(screen_to_draw , "red" , self.rect)
+		# print('drawing , 128 , character.draw()')
+		# pg.draw.rect(screen_to_draw , "red" , self.rect)
+		self.draw_range(screen_to_draw)
+
+	def draw_range(self , screen_to_draw , meele = True):
+		if meele:
+			new_surf = pg.Surface([self.meelee_dist*4]*2).convert_alpha()
+			new_surf.fill([0,0,0,0])
+			pg.draw.circle(new_surf, "blue" , self.rect.center , self.meelee_dist , 10)
+			screen_to_draw.blit(new_surf , screen_rect)
 
 	def draw_equip_screen(self , screen_to_draw , screen_to_draw_rect):
 		size = pg.Vector2(screen_to_draw_rect.size).elementwise()*(2 ,.5)

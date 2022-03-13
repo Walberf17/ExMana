@@ -7,6 +7,8 @@ pg.font.init()
 ######## Create main screen
 screen = pg.display.set_mode((800 , 800))
 screen_rect = screen.get_rect()
+FPS = 45
+map_proportion = pg.Vector2(40 , 40)
 
 ######## Groups
 text_boxes_group = pg.sprite.Group()
@@ -31,6 +33,7 @@ SCENES = {"Main Menu": None ,
            "Items Menu": None ,
            "Habilities Menu": None ,
            "Testes": None}
+
 buttons_dict = {
 	"equip_scene": {
 "head_btn" : [[0.1975 , 0.02375 , 0.1375 , 0.175], "unequip_item('head)"],
@@ -51,9 +54,22 @@ buttons_dict = {
 # for images in general
 IMAGES_PATH = './Images/'
 
+
 # Images for Characters:
 CHARACTER_IMAGES_DICT = {
 	1: ["Characters/Character1.png" , [64,64]],
+}
+
+# Images for Maps
+MAPS_IMAGES_DICT = {
+	1:["Maps/1.png" , [10 , 10] , "Mapa de Teste"],                 # image file , size of the map, in meters , name of the map
+	2:["Maps/1.png" , [5,5] , "Mapa de Teste"],
+}
+
+
+# Images for Effects
+EFFECT_IMAGES_DICT = {
+	1:["Effects/1.png"]
 }
 
 # for maps
@@ -86,7 +102,7 @@ effect_interations = [
 
 ######## dicts
 scene_test_dict = {
-	"draw": [text_boxes_group , monsters_group ,selection_group, players_group , cards_group ,maps_group, items_group , buttons_group] ,
+	"draw": [maps_group , text_boxes_group , monsters_group ,selection_group, players_group , cards_group, items_group , buttons_group] ,
 	"click_down": [buttons_group , selection_group] ,
 	"update": [buttons_group , players_group , selection_group],
 	"move": [buttons_group , selection_group]
@@ -104,9 +120,8 @@ EQUIPAMENTS = {
 
 ######## Definitions
 
-def create_scene(name , obj):
+def set_scene(name , obj):
 	SCENES[name] = obj
-
 
 def calc_relative_size(size , rect = screen_rect):
 	"""
@@ -132,6 +147,21 @@ def calc_relative_size(size , rect = screen_rect):
 		case _:
 			raise TypeError
 
+def calc_proportional_size(old_size):
+	match old_size:
+		case int(x) | float(x):
+			return map_proportion.x * x
+		case [x , y]:
+			a = map_proportion.x * x
+			b = map_proportion.y * y
+			return [a , b]
+		case [x , y , w , h]:
+			a = map_proportion.x * x
+			b = map_proportion.y * y
+			c = map_proportion.x * w
+			d = map_proportion.y * h
+			return [a , b , c , d]
+
 def equip_item(item , place):
 	for player in players_group:
 		player.equip_item(item , place)
@@ -139,3 +169,10 @@ def equip_item(item , place):
 def unequip_item(place):
 	for player in players_group:
 		player.unequip_item(place)
+
+def change_map_proportion(map_in_use):
+	global map_proportion
+	new_size = map_in_use.get_virtual_size()
+	rect_size = pg.Vector2(screen_rect.size)
+	map_proportion = rect_size.elementwise()/new_size
+	print(map_proportion)
