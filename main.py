@@ -1,7 +1,7 @@
 """
 
 Doing now:
-	map
+	map and effects
 
 Things to do:
 	Maps
@@ -29,9 +29,12 @@ from characters import Character
 from maps import Maps
 
 
-maps = Maps(1 , screen_rect)
-p1 = Character(4)
+maps = Maps(2, screen_rect)
+maps.add_effect(1 , [0,0] , [1,1] , 1)
+
+p1 = Character(1)
 players_group.add(p1)
+
 
 
 # create objects

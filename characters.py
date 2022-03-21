@@ -18,44 +18,58 @@ class Character(pg.sprite.Sprite):
 		:param images_idx: int
 		"""
 		super().__init__()
-
+		if images_idx is None:
+			images_idx = 1
+		self.images_idx = images_idx
 		this_character_list = CHARACTER_IMAGES_DICT.get(images_idx)
-		sight = [60,100]
-		self.height = random.randrange(160 , 210) / 100
-		if this_character_list:
-			images , self.sprite_size = this_character_list
-			self.images = pg.image.load(IMAGES_PATH + images)
-			# self.sprite_size = sprite_size
-			self.sprite_grid = self.images.get_size()[0] / self.sprite_size[0] , self.images.get_size()[1] / \
-			                   self.sprite_size[1]
-			self.image_index = [0 , 0]
-			self.width = self.height * self.sprite_size[1] / self.sprite_size[0]
-		else:
-			self.images = None
-			self.sprite_size = None
-			self.sprite_grid = None
-			self.image_index = None
-			self.width = float(self.height)
-		self.rect = pg.Rect((0 , 0) , calc_proportional_size((self.width , self.height)))
-		self.sex = random.choice(["Male","Female"])
-		self.sight = random.randrange(sight[0] , sight[1])/10
+		sight = [5,10]
+
+		# default values for this character
+		self.default_strength = 5  # default physical attack
+		self.default_resilience = 5  # default physical resilience
+		self.default_height = random.randrange(160 , 210) / 100
+		self.default_sight_meters = random.randrange(sight[0] , sight[1])
+		self.sex = random.choice(["Male" , "Female"])
 		if self.sex == "Female":
-			self.sight *= .9
-			self.height - random.randrange(0 , 10)
-		self.meelee_dist = calc_proportional_size(self.height)
-		self.max_mana = 10
-		self.max_hp = 10
-		self.velocity = 5
-		self.max_time = 15
-		self.time = 15
-		self.hp = 10
-		self.strength = 5  # default physical attack
-		self.resilience = 5  # default physical resilience
-		self.mana = 10
-		self.will = 5  # default magical attack and how strong controls mana
-		self.wisdow = 5  # default magical resilience
+			self.default_sight_meters *= .9
+			self.default_height -= (random.randrange(0 , 10)/100)
+		self.default_mana = 10
+		self.default_hp = 10
+		self.default_velocity = 5
+		self.default_time = 20
+		self.default_will = 5  # default magical attack and how strong controls mana
+		self.default_wisdom = 5  # default magical resilience
+		self.default_melee_dist = self.default_height
+
+		# changed status
+		self.strength = self.default_strength
+		self.resilience = self.default_resilience
+		self.height = self.default_height
+		self.sight_meters = self.default_sight_meters
+		self.sigh_pixels = calc_proportional_size(self.sight_meters)
+		self.mana = self.default_mana
+		self.hp = self.default_hp
+		self.velocity = self.default_velocity
+		self.time = self.default_time
+		self.will = self.default_will
+		self.wisdom = self.default_wisdom
+		self.melee_meters = self.default_melee_dist
+		self.melee_pixels = calc_proportional_size(self.melee_meters)
+
+		if this_character_list is None:
+			this_character_list = CHARACTER_IMAGES_DICT.get(1)
+		images , self.sprite_size = this_character_list
+
+		self.original_images = pg.image.load(IMAGES_PATH + images).convert_alpha()
+		self.images = self.original_images.copy()
+		self.sprite_grid = self.original_images.get_size()[0] / self.sprite_size[0] , self.original_images.get_size()[1] / \
+		                   self.sprite_size[1]
+		self.image_index = [0 , 0]
+		self.default_width = self.default_height * self.sprite_size[1] / self.sprite_size[0]
+		self.rect = pg.Rect((0,0),(calc_proportional_size([self.default_height, self.default_width])))
+		self.clicked = False
 		self.status = {}  # status to calc in game
-		self.equipaments = {
+		self.equipments = {
 			"head"      : None,
 			"r_hand"    : None,
 			"l_hand"    : None,
@@ -67,7 +81,6 @@ class Character(pg.sprite.Sprite):
 			"neck"      : None,
 		}
 		self.bag = {}
-		self.status = {}
 		self.dominant_hand = "r_hand"
 		self.other_hand = "l_hand"
 		self.level = 1
@@ -75,8 +88,13 @@ class Character(pg.sprite.Sprite):
 		self.battle_deck = None
 		self.adventure_deck = None
 		self.counter = 0
-		print(self.height , self.rect)
+		self.time_hud = pg.Rect(0,0,screen_rect.w*.034 , screen_rect.h)
+		self.proportion_time_velocity = .2
 		self.calc_status()
+		self.change_size_proportion()
+
+
+	### Change things for the game
 
 	def set_deck(self , deck , adventure):
 		"""
@@ -96,9 +114,9 @@ class Character(pg.sprite.Sprite):
 		:return: None
 		"""
 		i , j = self.image_index
-		w , h = self.sprite_size
-		init_x = self.rect.left + (w * i)
-		init_y = self.rect.top + (h * j)
+		w , h = self.rect.size
+		init_x = (w * i)
+		init_y = (h * j)
 		return pg.Rect(init_x , init_y , w , h)
 
 	def create_rect_to_draw_in_status(self , size):
@@ -115,6 +133,50 @@ class Character(pg.sprite.Sprite):
 		init_y = self.rect.top + (h * j)
 		return pg.Rect(init_x , init_y , w , h)
 
+	def change_size_proportion(self):
+		"""
+		Change the rect and stuff proportionally to the current map.
+		Change the rect and the images
+		:return: None
+		"""
+		self.rect = pg.Rect((random.randrange(800) , random.randrange(800)) , calc_proportional_size((self.width , self.height)))
+		self.sight_pixels = calc_proportional_size(self.sight_meters)
+		self.melee_pixels = calc_proportional_size(self.melee_meters)
+		if self.images:
+			self.images = pg.transform.scale(self.original_images ,
+			                                 (self.rect.w * self.sprite_grid[0] , self.rect.h * self.sprite_grid[1]))
+			# new_size = pg.Vector2(self.images.get_size())
+			# self.sprite_size = new_size.elementwise() * self.sprite_grid
+
+
+	### interactions with the player
+	def click_down(self , event):
+		"""
+		for debug
+		:param event: pg.Event
+		:return: Bool
+		"""
+		pg.mouse.get_rel()
+		if self.rect.collidepoint(event.pos):
+			self.clicked = True
+		return self.clicked
+
+	def move(self):
+		"""
+		for debug
+		:return: None
+		"""
+		if self.clicked:
+			mouse_move = pg.mouse.get_rel()
+			self.rect.move_ip(mouse_move)
+
+	def click_up(self , event):
+		"""
+		for debug
+		:return: None
+		"""
+		self.clicked = False
+
 	def draw(self , screen_to_draw):
 		"""
 		draw itself on the given surface
@@ -122,19 +184,45 @@ class Character(pg.sprite.Sprite):
 		:return: None
 		"""
 		if self.images:  # draw the image, if any
-			screen_to_draw.blit(self.images , self.rect , self.create_rect_to_draw())
+			new_surf = pg.Surface((self.rect.size)).convert_alpha()
+			new_surf.fill([0,0,0,0])
+			new_surf.blit(self.images , (0,0) , self.create_rect_to_draw())
+			screen_to_draw.blit(new_surf, self.rect)
 		else:  # draw a rect to debug
 			pg.draw.rect(screen_to_draw , "red" , self.rect)
-		# print('drawing , 128 , character.draw()')
-		# pg.draw.rect(screen_to_draw , "red" , self.rect)
-		self.draw_range(screen_to_draw)
+		pg.draw.rect(screen_to_draw , "green" , self.rect , 1)
+		pg.draw.rect(screen_to_draw , "red" , self.time_hud)
+		# self.draw_range(screen_to_draw, False)
+
+		# for debug
+		# txt = main_menu_font.render(str(self.duration) , True , "red" , "black")
+		# screen_to_draw.blit(txt , (0,0))
 
 	def draw_range(self , screen_to_draw , meele = True):
-		if meele:
-			new_surf = pg.Surface([self.meelee_dist*4]*2).convert_alpha()
+		"""
+		Draw a circle for the given range of the attack
+		:param screen_to_draw: pg.Surface
+		:param meele: Bool
+		:return: None
+		"""
+		melee_dist = self.melee_pixels
+		if meele:  # draws a smaller circle, with the range of the meelee attack
+			new_surf = pg.Surface([melee_dist*2]* 2).convert_alpha()
 			new_surf.fill([0,0,0,0])
-			pg.draw.circle(new_surf, "blue" , self.rect.center , self.meelee_dist , 10)
-			screen_to_draw.blit(new_surf , screen_rect)
+			new_surf_rect = new_surf.get_rect()
+			pg.draw.circle(new_surf , [0,0,255,150] , (new_surf_rect.w/2,new_surf_rect.h/2) , melee_dist)
+			pg.draw.circle(new_surf , [0,0,0,0] , (new_surf_rect.w/2,new_surf_rect.h/2) , melee_dist /2)
+		else: # draws a smaller circle, based on the sight_pixels of the character
+			sight_dist = self.sight_pixels
+			new_surf = pg.Surface([sight_dist*2] * 2).convert_alpha()
+			new_surf.fill([0,0,0 , 0])
+			new_surf_rect = new_surf.get_rect()
+			pg.draw.circle(new_surf , [0 , 0 , 255 , 150] , (new_surf_rect.w/2,new_surf_rect.h/2) , sight_dist)
+			pg.draw.circle(new_surf , [0 , 0 , 0 , 0] , (new_surf_rect.w/2,new_surf_rect.h/2) , melee_dist)
+
+		new_surf_rect.center = self.rect.center
+		# pg.draw.rect(screen_to_draw , "black" , new_surf_rect)
+		screen_to_draw.blit(new_surf , new_surf_rect)
 
 	def draw_equip_screen(self , screen_to_draw , screen_to_draw_rect):
 		size = pg.Vector2(screen_to_draw_rect.size).elementwise()*(2 ,.5)
@@ -151,30 +239,125 @@ class Character(pg.sprite.Sprite):
 		updates the image index.
 		:return: None
 		"""
+		# updates the image
 		if self.images:
 			self.counter += 1
-			self.image_index[0] = int((self.counter * self.velocity / 30) % (self.sprite_grid[0]))
+			self.image_index[0] = int((self.counter * self.velocity / (2*FPS)) % (self.sprite_grid[0]))
 
-	def change_hp(self , value = -2):
+		# updates the hud of duration
+		if self.time > 0:
+			self.time += - 1/FPS
+			dtime = self.time/self.default_time
+			self.time_hud.h = screen_rect.h*dtime
+			self.time_hud.bottomright = screen_rect.bottomright
+
+
+	# change Default Status
+
+	def change_images_idx(self , value):
+		self.images_idx = value
+		this_character_list = CHARACTER_IMAGES_DICT.get(value)
+		if this_character_list is None:
+			this_character_list = CHARACTER_IMAGES_DICT.get(1)
+		images , self.sprite_size = this_character_list
+		self.original_images = pg.image.load(IMAGES_PATH + images).convert_alpha()
+		self.images = self.original_images.copy()
+		self.sprite_grid = self.original_images.get_size()[0] / self.sprite_size[0] , \
+		                   self.original_images.get_size()[1] / self.sprite_size[1]
+		self.image_index = [0 , 0]
+		self.default_width = self.default_height * self.sprite_size[1] / self.sprite_size[0]
+		self.change_size_proportion()
+
+	def change_default_strength(self , value):
 		"""
-		Do not use this directly, this is a internal to change the hp. It sets the new hp of the character.
+		change the strength parameter of the character.
 		:param value: int
 		:return: None
 		"""
-		self.hp += value
-		self.hp = min(self.hp , self.max_hp)
+		self.default_strength += value
 
-	def change_mana(self , value: int = -2):
+	def change_default_resilience(self , value):
 		"""
-		Do not use this directly, this is a internal to change the mp. It sets the new hp of the character.
+		change the resilience parameter of the character.
 		:param value: int
 		:return: None
 		"""
-		self.mana += value
+		self.default_resilience += value
+
+	def change_default_height(self , value):
+		self.default_height += value
+
+	def change_default_sight(self , value):
+		self.default_sight_meters += value
+
+	def change_sex(self , value):
+		self.sex = value
+
+	def change_default_mana(self , value):
+		"""
+		change the maximum mana parameter of the character.
+		:param value: int
+		:return: None
+		"""
+		self.default_mana += value
+
+	def change_default_hp(self , value):
+		"""
+		change the maximum health parameter of the character.
+		:param value: int
+		:return: None
+		"""
+		self.default_hp += value
+
+	def change_default_velocity(self , value):
+		"""
+		change the maximum velocity parameter of the character.
+		:param value: int
+		:return: None
+		"""
+		self.default_velocity += value
+
+	def change_default_time(self , value):
+		"""
+		change the maximum duration parameter of the character.
+		:param value: int
+		:return: None
+		"""
+		self.default_time += value
+
+	def change_default_will(self , value):
+		"""
+		change the will parameter of the character.
+		:param value: int
+		:return: None
+		"""
+		self.default_will += value
+
+	def change_default_wisdom(self , value):
+		"""
+		change the wisdom parameter of the character.
+		:param value: int
+		:return: None
+		"""
+		self.default_wisdom += value
+
+	def change_default_melee_dist(self , value):
+		self.default_melee_dist += value
+
+	def change_level(self , value = 1):
+		self.level += value
+
+	def change_dominant_hand(self , value):
+		self.dominant_hand = value
+
+	def change_other_hand(self , value):
+		self.other_hand = value
+
+	# Change Status
 
 	def change_strength(self , value):
 		"""
-		change the strength parameter of the character.
+		change the current strength parameter of the character.
 		:param value: int
 		:return: None
 		"""
@@ -182,11 +365,43 @@ class Character(pg.sprite.Sprite):
 
 	def change_resilience(self , value):
 		"""
-		change the resilience parameter of the character.
+		change the current resilience parameter of the character.
 		:param value: int
 		:return: None
 		"""
 		self.resilience += value
+
+	def change_height(self , value):
+		"""
+		change the current height parameter of the character.
+		:param value: int
+		:return: None
+		"""
+		self.height += value
+
+	def change_sight(self , value):
+		"""
+		change the current sight in meters parameter of the character.
+		:param value: int
+		:return: None
+		"""
+		self.sight_meters += value
+
+	def change_velocity(self , value):
+		"""
+		change the current velocity parameter of the character.
+		:param value: int
+		:return: None
+		"""
+		self.velocity += value
+
+	def change_time(self , value):
+		"""
+		change the current duration parameter of the character.
+		:param value: int
+		:return: None
+		"""
+		self.time += value
 
 	def change_will(self , value):
 		"""
@@ -196,29 +411,44 @@ class Character(pg.sprite.Sprite):
 		"""
 		self.will += value
 
-	def change_wisdow(self , value):
+	def change_wisdom(self , value):
 		"""
-		change the wisdow parameter of the character.
+		change the current wisdom parameter of the character.
 		:param value: int
 		:return: None
 		"""
-		self.wisdow += value
+		self.wisdom += value
 
-	def change_max_mana(self , value):
+	def change_melee_dist(self , value):
 		"""
-		change the maximum mana parameter of the character.
+		change the current melee distance parameter of the character.
 		:param value: int
 		:return: None
 		"""
-		self.max_mana += value
+		self.melee_meters += value
 
-	def change_max_hp(self , value):
+	def change_hp(self , value = -2):
 		"""
-		change the maximum health parameter of the character.
+		Do not use this directly, this is a internal to change the hp. It sets the new hp of the character.
 		:param value: int
 		:return: None
 		"""
-		self.max_hp += value
+		self.hp += value
+		self.hp = min(self.hp , self.default_hp)
+
+	def change_mana(self , value: int = -2):
+		"""
+		Do not use this directly, this is a internal to change the mp. It sets the new hp of the character.
+		:param value: int
+		:return: None
+		"""
+		self.mana += value
+
+
+	# actions
+
+	def move_card(self , value):
+		pass
 
 	def physical_attack(self , power):
 		pass
@@ -231,20 +461,29 @@ class Character(pg.sprite.Sprite):
 		Calc the status of this character
 		:return:
 		"""
-
-		velocity = self.velocity
-		hp = self.hp
-		strength = self.strength
-		resilience = self.resilience
-		mana = self.mana
-		will = self.will
-		wisdow = self.wisdow
-		for _ , item in self.equipaments.items():
+		strength = self.default_strength
+		resilience = self.default_resilience
+		height = self.default_height
+		sight_meters = self.default_sight_meters
+		mana = self.default_mana
+		hp = self.default_hp
+		velocity = self.default_velocity
+		time = self.default_time
+		will = self.default_will
+		wisdow = self.default_wisdom
+		melee_dist = self.melee_meters
+		for _ , item in self.equipments.items():
 			if item is not None:
-				dict_item = EQUIPAMENTS.get(item)
+				dict_item = EQUIPAMENTS_DICT.get(item)
 				modifiers = dict_item.get("modifiers")
 				for modifier , value in modifiers.items():
 					match modifier:
+						case "height":
+							height += value
+						case "melee_meters":
+							melee_dist += value
+						case "sight":
+							sight_meters += value
 						case "velocity":
 							velocity += value
 						case "hp":
@@ -257,37 +496,43 @@ class Character(pg.sprite.Sprite):
 							mana += value
 						case "will":
 							will += value
-						case "wisdow":
+						case "wisdom":
 							wisdow += value
-		self.status = {
-			"velocity": velocity ,
-			"hp": hp ,
-			"strength": strength ,
-			"resilience": resilience ,
-			"mana": mana ,
-			"will": will ,
-			"wisdow": wisdow
-		}
+
+		self.strength = strength
+		self.resilience = resilience
+		self.height = height
+		self.sight_meters = sight_meters
+		self.sight_pixels = calc_proportional_size(self.sight_meters)
+		self.mana = mana
+		self.hp = hp
+		self.velocity = velocity
+		self.default_time = self.time = time + self.proportion_time_velocity*self.velocity
+		self.will = will
+		self.wisdom = wisdow
+		self.width = self.height * self.sprite_size[1] / self.sprite_size[0]
+		self.melee_meters = melee_dist
+		self.melee_pixels = calc_proportional_size(self.melee_meters)
 
 	def equip_item(self , item , place = None):
 		"""
-		Set the item in a place for the player's equipaments
-		:param item: index of the item in the EQUIPAMENTS dictionary
-		:param place: str with the place to put the equipaments, if None, gets the Default: 'r_hand' ,
+		Set the item in a place for the player's equipments
+		:param item: index of the item in the EQUIPAMENTS_DICT dictionary
+		:param place: str with the place to put the equipments, if None, gets the Default: 'r_hand' ,
 		l_hand , head , neck , foot , legs , chest , r_finger , l_finger
 		:return:
 		"""
 		if place is None:
-			place = EQUIPAMENTS.get(item).get("place")
+			place = EQUIPAMENTS_DICT.get(item).get("place")
 		if place == "2hand":
 			self.unequip_item("l_hand")
 			self.unequip_item("r_hand")
 		if place == "hand":
-			if self.equipaments.get(self.dominant_hand):
-				place = self.ohter_hand
+			if self.equipments.get(self.dominant_hand):
+				place = self.other_hand
 			else:
 				place = self.dominant_hand
-		self.equipaments[place] = item
+		self.equipments[place] = item
 		self.calc_status()
 
 	def unequip_item(self , place):
@@ -296,8 +541,8 @@ class Character(pg.sprite.Sprite):
 		:param place: str
 		:return: None
 		"""
-		if place in self.equipaments:
-			self.equipaments.pop(place)
+		if place in self.equipments:
+			self.equipments.pop(place)
 		self.calc_status()
 
 	def get_status(self):
@@ -305,14 +550,29 @@ class Character(pg.sprite.Sprite):
 		returns a dictionary with the current status of the character.
 		:return: dict
 		"""
-		return self.status
+		status_dict = {
+		"strength" : self.strength,
+		"resilience" : self.resilience,
+		"height" : self.height,
+		"sight_meters" : self.sight_meters,
+		"mana" : self.mana,
+		"hp" : self.hp,
+		"velocity" : self.velocity,
+		"duration" : self.time,
+		"will" : self.will,
+		"wisdom" : self.wisdom,
+		"melee_meters" : self.melee_meters,
+		}
+		return status_dict
 
 	def get_equipaments(self):
 		"""
 		returns a dictionary with the current equiped items
 		:return:
 		"""
-		return self.equipaments
+		return self.equipments
+
+	# Effects
 
 	def fire_damage(self , value: int = -2):
 		"""
@@ -320,6 +580,10 @@ class Character(pg.sprite.Sprite):
 		:param value: int
 		:return: None
 		"""
+		if value > 0:
+			value = max(0 , value - self.wisdom)
+		else:
+			value = min(0 , value - self.wisdom)
 		self.change_hp(value)
 
 	def ice_damage(self , value: int = -2):
@@ -328,6 +592,10 @@ class Character(pg.sprite.Sprite):
 		:param value:
 		:return:
 		"""
+		if value > 0:
+			value = max(0 , value - self.wisdom)
+		else:
+			value = min(0 , value - self.wisdom)
 		self.change_hp(value)
 
 	def poison_damage(self , value: int = -2):
@@ -336,6 +604,10 @@ class Character(pg.sprite.Sprite):
 		:param value: int
 		:return: None
 		"""
+		if value > 0:
+			value = max(0 , value - self.wisdom)
+		else:
+			value = min(0 , value - self.wisdom)
 		self.change_hp(value)
 
 	def ground_damage(self , value: int = -2):
@@ -344,14 +616,22 @@ class Character(pg.sprite.Sprite):
 		:param value: int
 		:return: None
 		"""
+		if value > 0:
+			value = max(0 , value - self.wisdom)
+		else:
+			value = min(0 , value - self.wisdom)
 		self.change_hp(value)
 
 	def wind_damage(self , value: int = -2):
 		"""
-				Deals wind damage to this character. Change if needed.
-				:param value: int
-				:return: None
-				"""
+		Deals wind damage to this character. Change if needed.
+		:param value: int
+		:return: None
+		"""
+		if value > 0:
+			value = max(0 , value - self.wisdom)
+		else:
+			value = min(0 , value - self.wisdom)
 		self.change_hp(value)
 
 	def electric_damage(self , value: int = -2):
@@ -360,6 +640,10 @@ class Character(pg.sprite.Sprite):
 		:param value: int
 		:return: None
 		"""
+		if value > 0:
+			value = max(0 , value - self.wisdom)
+		else:
+			value = min(0 , value - self.wisdom)
 		self.change_hp(value)
 
 	def dark_damage(self , value: int = -2):
@@ -368,6 +652,10 @@ class Character(pg.sprite.Sprite):
 		:param value: int
 		:return: None
 		"""
+		if value > 0:
+			value = max(0 , value - self.wisdom)
+		else:
+			value = min(0 , value - self.wisdom)
 		self.change_hp(value)
 
 	def light_damage(self , value: int = -2):
@@ -376,14 +664,22 @@ class Character(pg.sprite.Sprite):
 		:param value: int
 		:return: None
 		"""
+		if value > 0:
+			value = max(0 , value - self.wisdom)
+		else:
+			value = min(0 , value - self.wisdom)
 		self.change_hp(value)
 
 	def time_damage(self , value: int = -2):
 		"""
-		Deals time damage to this character. Change if needed.
+		Deals duration damage to this character. Change if needed.
 		:param value: int
 		:return: None
 		"""
+		if value > 0:
+			value = max(0 , value - self.wisdom)
+		else:
+			value = min(0 , value - self.wisdom)
 		self.change_hp(4*value)
 
 	def gravity_damage(self , value: int = -2):
@@ -392,6 +688,10 @@ class Character(pg.sprite.Sprite):
 		:param value: int
 		:return: None
 		"""
+		if value > 0:
+			value = max(0 , value - self.wisdom)
+		else:
+			value = min(0 , value - self.wisdom)
 		self.change_hp(value)
 
 	def space_damage(self , value: int = -2):
@@ -400,6 +700,10 @@ class Character(pg.sprite.Sprite):
 		:param value: int
 		:return: None
 		"""
+		if value > 0:
+			value = max(0 , value - self.wisdom)
+		else:
+			value = min(0 , value - self.wisdom)
 		self.change_hp(value)
 
 	def pure_damage(self , value: int = -2):
@@ -416,6 +720,30 @@ class Character(pg.sprite.Sprite):
 		:param value:
 		:return:
 		"""
+		if value > 0:
+			value = max(0 , value - self.wisdom-random.randint(self.will))
+		else:
+			value = min(0 , value - self.wisdom-random.randint(self.will))
+		self.change_hp(value)
+
+	def physical_damage(self , value: int = -2):
+		"""
+		Deals physical damage to this character. Change if needed.
+		:param value:
+		:return:
+		"""
+		if value > 0:
+			value = max(0 , value - self.resilience)
+		else:
+			value = min(0 , value - self.resilience)
+		self.change_hp(value)
+
+	def oil_damage(self , value: int = -2):
+		if value > 0:
+			value = max(0 , value - self.resilience)
+		else:
+			value = min(0 , value - self.resilience)
+		self.velocity -= int(value/2)
 		self.change_hp(value)
 
 	def calc_new_size(self):
@@ -427,76 +755,45 @@ class Character(pg.sprite.Sprite):
 
 	def save_player(self):
 		new_dict = {
-			'height': self.height,
-			'width': self.width,
-			'sex': self.sex,
-			'sight': self.sight,
-			'meelee_dist': self.meelee_dist,
-			'max_mana': self.max_mana,
-			'max_hp': self.max_hp,
-			'velocity': self.velocity,
-			'max_time': self.max_time,
-			'time': self.time,
-			'hp': self.hp,
-			'strength': self.strength,
-			'resilience': self.resilience,
-			'mana': self.mana,
-			'will': self.will,
-			'wisdow': self.wisdow,
-			'equipaments': self.equipaments,
-			"bag" : self.bag ,
-			"dominant_hand" : self.dominant_hand ,
-			"other_hand" : self.other_hand ,
-			"level" : self.level ,
-			"counter" : self.counter ,
+			'images_idx'            :       self.images_idx,
+			'default_strength'      :       self.default_strength ,
+			'default_resilience'    :       self.default_resilience ,
+			'default_height'        :       self.default_height ,
+			'default_sight_meters'  :       self.default_sight_meters ,
+			'sex'                   :       self.sex ,
+			'default_mana'          :       self.default_mana ,
+			'default_hp'            :       self.default_hp ,
+			'default_velocity'      :       self.default_velocity ,
+			'default_time'          :       self.default_time ,
+			'default_will'          :       self.default_will ,
+			'default_wisdom'        :       self.default_wisdom ,
+			'default_melee_dist'    :       self.default_melee_dist ,
+			'level'                 :       self.level ,
+			'bag'                   :       self.bag,
+			'equipments'            :       self.equipments,
+			'dominant_hand'         :       self.dominant_hand,
+			'other_hand'            :       self.other_hand,
 		}
+		return new_dict
 
-
-	def load_player(self):
-		new_dict = {
-			'height': self.height ,
-			'width': self.width ,
-			'sex': self.sex ,
-			'sight': self.sight ,
-			'meelee_dist': self.meelee_dist ,
-			'max_mana': self.max_mana ,
-			'max_hp': self.max_hp ,
-			'velocity': self.velocity ,
-			'max_time': self.max_time ,
-			'time': self.time ,
-			'hp': self.hp ,
-			'strength': self.strength ,
-			'resilience': self.resilience ,
-			'mana': self.mana ,
-			'will': self.will ,
-			'wisdow': self.wisdow ,
-			'equipaments': self.equipaments ,
-			"bag": self.bag ,
-			"dominant_hand": self.dominant_hand ,
-			"other_hand": self.other_hand ,
-			"level": self.level ,
-			"counter": self.counter ,
-		}
-
-		self.height = new_dict.get('height')
-		self.width = new_dict.get('width')
+	def load_player(self , new_dict):
+		self.images_idx = new_dict.get('images_idx')
+		self.default_strength = new_dict.get('default_strength')
+		self.default_resilience = new_dict.get('default_resilience')
+		self.default_height = new_dict.get('default_height')
+		self.default_sight_meters = new_dict.get('default_sight_meters')
 		self.sex = new_dict.get('sex')
-		self.sight = new_dict.get('sight')
-		self.meelee_dist = new_dict.get('meelee_dist')
-		self.max_mana = new_dict.get('max_mana')
-		self.max_hp = new_dict.get('max_hp')
-		self.velocity = new_dict.get('velocity')
-		self.max_time = new_dict.get('max_time')
-		self.time = new_dict.get('time')
-		self.hp = new_dict.get('hp')
-		self.strength = new_dict.get('strength')
-		self.resilience = new_dict.get('resilience')
-		self.mana = new_dict.get('mana')
-		self.will = new_dict.get('will')
-		self.wisdow = new_dict.get('wisdow')
-		self.equipaments = new_dict.get('equipaments')
-		self.bag = new_dict.get("bag")
-		self.dominant_hand = new_dict.get("dominant_hand")
-		self.other_hand = new_dict.get("other_hand")
-		self.level = new_dict.get("level")
-		self.counter = new_dict.get("counter")
+		self.default_mana = new_dict.get('default_mana')
+		self.default_hp = new_dict.get('default_hp')
+		self.default_velocity = new_dict.get('default_velocity')
+		self.default_time = new_dict.get('default_time')
+		self.default_will = new_dict.get('default_will')
+		self.default_wisdom = new_dict.get('default_wisdom')
+		self.default_melee_dist = new_dict.get('default_melee_dist')
+		self.level = new_dict.get('level')
+		self.bag = new_dict.get('bag')
+		self.equipments = new_dict.get('equipments')
+		self.dominant_hand = new_dict.get('dominant_hand')
+		self.other_hand = new_dict.get('other_hand')
+		self.calc_status()
+		self.change_size_proportion()

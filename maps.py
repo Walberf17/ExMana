@@ -5,9 +5,24 @@ give the size, save the items for the player to discover.
 
 
 from variables_and_definitions import *
+from effects import Effect
 
-class Maps:
-	def __init__(self , idx_map = 1 , rect = screen_rect , item_dict = None):
+class Maps(pg.sprite.Sprite):
+	"""
+	This map is not a grid (v2.0)
+	it draws itself.
+	update the effects and interactions
+	gets the virtual size in meters
+	"""
+	def __init__(self , idx_map , rect , item_dict = None):
+		"""
+		this class will be a way to interact with the effects, and locate teh player in the screen,
+		also give bounds so that the player is always on screen.
+		:param idx_map: int for the MAPS_IMAGES_DICT in variables and definitions.
+		:param rect: pg.Rect to be drawn.
+		:param item_dict: a dictionary of the items in this map.
+		"""
+		super().__init__()
 		if item_dict is None:
 			item_dict = {}
 		map_image_path , self.virtual_size , self.name = MAPS_IMAGES_DICT.get(idx_map)
@@ -16,23 +31,38 @@ class Maps:
 		else:
 			self.image = None
 		self.rect = rect
-		self.image = pg.transform.scale(self.image , self.rect.size)
+		if self.image:
+			self.image = pg.transform.scale(self.image , self.rect.size)
 		self.secrets = item_dict
-		self.effects = {}
+		self.effects = pg.sprite.Group()
 		change_map_proportion(self)
 		maps_group.add(self)
 
 	def draw(self , screen_to_draw):
+		"""
+		Draws the image in the given screen.
+		:param screen_to_draw: pg.Surface
+		:return:
+		"""
 		if self.image:
 			screen_to_draw.blit(self.image , self.rect)
 		else:
 			pg.draw.rect(screen_to_draw , "red" , self.rect)
+		self.draw_effects(screen_to_draw)
 
 	def draw_effects(self , screen_to_draw):
+		surf_effects = pg.Surface(self.rect.size).convert_alpha()
+		surf_effects.fill([0,0,0,0])
 		for effect in self.effects:
-			effect.draw(screen_to_draw)
+			effect.draw(surf_effects)
+		surf_effects.set_alpha(100)
+		screen_to_draw.blit(surf_effects , (0,0))
 
 	def update(self):
+		"""
+		update itself and effects in this map, checking interaction of the effects and doind the effects.
+		:return:
+		"""
 		# mingle effects
 		self.effects_update()
 
@@ -41,24 +71,17 @@ class Maps:
 
 
 	def check_interations(self):
-		for effect1, effect2 , new_effect in effect_interations:
-			if effect1 in self.effects and effect2 in self.effects:
-				time1 = self.effects.get(effect1)
-				time2 = self.effects.get(effect2)
-				self.effects.pop(effect1)
-				self.effects.pop(effect2)
-				self.effects[new_effect] = min([time1 , time2])
+		interactions = set()
+		for effect in self.effects:
+			interactions.update(effect.check_colision_effect(self.effects))
+
+
+	def add_effect(self , effect_idx , pos , area , duration):
+		new_effect = Effect(effect_idx , pos , area , duration , [self.effects , effects_group])
 
 	def effects_update(self):
-		for_delete_effect = []
-		for effect , time in self.effects.items():
-			if time is not None:
-				effect.time -= 1
-			if time < 1 or time is None:
-				for_delete_effect.append(effect)
-
-		for effect in for_delete_effect:
-			self.effects.pop(effect)
+		for effect in self.effects:
+			effect.update()
 
 	def get_virtual_size(self):
 		return self.virtual_size

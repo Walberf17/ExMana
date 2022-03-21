@@ -14,13 +14,14 @@ map_proportion = pg.Vector2(40 , 40)
 text_boxes_group = pg.sprite.Group()
 monsters_group = pg.sprite.Group()
 players_group = pg.sprite.GroupSingle()
-maps_group = set()
+maps_group = pg.sprite.GroupSingle()
 cards_group = pg.sprite.Group()
 items_group = pg.sprite.Group()
 buttons_group = pg.sprite.Group()
 buttons_main_scene = pg.sprite.Group()
 buttons_equip_scene = pg.sprite.Group()
 selection_group = pg.sprite.Group()
+effects_group = pg.sprite.Group()
 
 ######## Fonts for texts
 font_size = int(screen_rect.h * .1)
@@ -28,48 +29,46 @@ main_menu_font = pg.font.SysFont("Arial" , font_size , False , True)
 
 ######## Sets of things
 SCENES = {"Main Menu": None ,
-           "Main Adventure": None ,
-           "Main Battle": None ,
-           "Items Menu": None ,
-           "Habilities Menu": None ,
-           "Testes": None}
+          "Main Adventure": None ,
+          "Main Battle": None ,
+          "Items Menu": None ,
+          "Habilities Menu": None ,
+          "Testes": None}
 
 buttons_dict = {
 	"equip_scene": {
-"head_btn" : [[0.1975 , 0.02375 , 0.1375 , 0.175], "unequip_item('head)"],
-"neck_btn" : [[0.22125 , 0.21125 , 0.0875 , 0.0875], "unequip_item('neck')"],
-"chest_btn1" : [[0.1625 , 0.30375 , 0.2125 , 0.2875], "unequip_item('chest')"],
-"chest_btn2" : [[0.08625 , 0.32 , 0.05 , 0.225], "unequip_item('chest')"],
-"chest_btn3" : [[0.4 , 0.315 , 0.05 , 0.2375], "unequip_item('chest')"],
-"l_finger_btn" : [[0.45875 , 0.53125 , 0.0375 , 0.05], "unequip_item('l_finger')"],
-"r_finger_btn" : [[0.03625 , 0.52625 , 0.0375 , 0.05], "unequip_item('r_finger')"],
-"r_hand_btn" : [[-0.03625 , 0.59 , 0.175 , 0.2], "unequip_item('r_hand')"],
-"legs_btn" : [[0.21 , 0.6 , 0.125 , 0.2875], "unequip_item('legs')"],
-"l_hand_btn" : [[0.39875 , 0.58875 , 0.175 , 0.2], "unequip_item('l_hand')"],
-"feet_btn" : [[0.1475 , 0.89125 , 0.25 , 0.075], "unequip_item('feet')"],
+		"head_btn": [[0.1975 , 0.02375 , 0.1375 , 0.175] , "unequip_item('head)"] ,
+		"neck_btn": [[0.22125 , 0.21125 , 0.0875 , 0.0875] , "unequip_item('neck')"] ,
+		"chest_btn1": [[0.1625 , 0.30375 , 0.2125 , 0.2875] , "unequip_item('chest')"] ,
+		"chest_btn2": [[0.08625 , 0.32 , 0.05 , 0.225] , "unequip_item('chest')"] ,
+		"chest_btn3": [[0.4 , 0.315 , 0.05 , 0.2375] , "unequip_item('chest')"] ,
+		"l_finger_btn": [[0.45875 , 0.53125 , 0.0375 , 0.05] , "unequip_item('l_finger')"] ,
+		"r_finger_btn": [[0.03625 , 0.52625 , 0.0375 , 0.05] , "unequip_item('r_finger')"] ,
+		"r_hand_btn": [[-0.03625 , 0.59 , 0.175 , 0.2] , "unequip_item('r_hand')"] ,
+		"legs_btn": [[0.21 , 0.6 , 0.125 , 0.2875] , "unequip_item('legs')"] ,
+		"l_hand_btn": [[0.39875 , 0.58875 , 0.175 , 0.2] , "unequip_item('l_hand')"] ,
+		"feet_btn": [[0.1475 , 0.89125 , 0.25 , 0.075] , "unequip_item('feet')"] ,
 	}
 }
-
 
 # for images in general
 IMAGES_PATH = './Images/'
 
-
 # Images for Characters:
 CHARACTER_IMAGES_DICT = {
-	1: ["Characters/Character1.png" , [64,64]],
+	1: ["Characters/Character1.png" , [64 , 64]] ,
 }
 
 # Images for Maps
 MAPS_IMAGES_DICT = {
-	1:["Maps/1.png" , [10 , 10] , "Mapa de Teste"],                 # image file , size of the map, in meters , name of the map
-	2:["Maps/1.png" , [5,5] , "Mapa de Teste"],
+	1: ["Maps/1.png" , [50 , 50] , "Mapa de Teste"] ,  # image file , size of the map, in meters , name of the map
+	2: ["Maps/1.png" , [5 , 5] , "Mapa de Teste"] ,
+	3: ["Maps/1.png" , [10 , 10] , "Mapa de Teste"] ,
 }
-
 
 # Images for Effects
 EFFECT_IMAGES_DICT = {
-	1:["Effects/1.png"]
+	1: ["Effects/1.png" , "Fire" , [64 , 64]]
 }
 
 # for maps
@@ -100,28 +99,138 @@ effect_interations = [
 	["Oxigen" , "Firaga" , "Explosion"] ,
 ]
 
-######## dicts
+######## dicts and lists
 scene_test_dict = {
-	"draw": [maps_group , text_boxes_group , monsters_group ,selection_group, players_group , cards_group, items_group , buttons_group] ,
-	"click_down": [buttons_group , selection_group] ,
-	"update": [buttons_group , players_group , selection_group],
-	"move": [buttons_group , selection_group]
+	"draw": [maps_group , text_boxes_group , monsters_group , selection_group , players_group , cards_group ,
+	         items_group , buttons_group] ,
+	"click_down": [buttons_group , selection_group , players_group] ,
+	"update": [buttons_group , maps_group , players_group , selection_group] ,
+	"move": [buttons_group , players_group , selection_group]
 }
 
-EQUIPAMENTS = {
-	1: {"name" : "small sword of wood",
-	    "description" : "Is it a toy?!",
-	    "place" : "hand",
-	    "modifiers":{ "attack" : 2,
-	                  "velocity": 3,
-	                  "mana" : 5
-	    }
-}}
+EQUIPAMENTS_DICT = {  # name:str , description:str , place:str , modifiers: dict of status to modify and number
+	1: {"name": "small sword of wood" ,
+	    "description": "Is it a toy?!" ,
+	    "place": "hand" ,
+	    "modifiers": {"attack": 2 ,
+	                  "velocity": 3 ,
+	                  "mana": 5
+	                  }
+	    } ,
+
+}
+
+effects_and_damages = [
+	"fire_damage" ,
+	"ice_damage" ,
+	"poison_damage" ,
+	"ground_damage" ,
+	"wind_damage" ,
+	"electric_damage" ,
+	"dark_damage" ,
+	"light_damage" ,
+	"time_damage" ,
+	"oil_damage" ,
+	"gravity_damage" ,
+	"space_damage" ,
+	"pure_damage" ,
+	"stress_damage" ,
+	"physical_damage"
+	"feel_smell"
+	"feel_taste"
+	"feel_sight"
+	"search"
+	"throughtful_search"
+	"move_card"
+
+]
+
+deck_list_cards_battle = list(x+1 for x in range(11))
+
+CARDS_DICT = {
+	# index: dict{name:str, active_effect:list , map_effect:list , cost: float , melee:boolean
+	# effects: [[effect1 , duration1 , size1] , [effect2 , duration2]]
+	# size: list if rect , int if circle
+	1: {
+		"name": 'Descanse em Paz' ,
+		'active_effect': [['stress_damage(30)' , 0 , .5]] ,
+		'cost': 15 ,
+		'melee': False ,
+	} ,
+	2: {
+		'name': 'Cafungada Monstra' ,
+		'active_effect': [['feel_smell(1)' , 0 , .2]] ,
+		'cost': 5 ,
+		'melee': True ,
+	} ,
+	3: {
+		'name': 'Assadura Grave' ,
+		'active_effect': [['fire_damage(10)' , 0 , [1 , 1]] , ['fire_damage(5)' , 5 , [1 , 1]]] ,
+		'map_effect': [['fire_damage(5)' , 0 , [2 , 2]]] ,
+		'cost': 15 ,
+		'melee': False ,
+	} ,
+	4: {
+		'name': '22º em Moc' ,
+		'active_effect': [['ice_damage(10)' , 0 , [1 , 1]] , ['ice_damage(5)' , 4 , [2 , 2]]] ,
+		'map_effect': [['ice_damage(5)' , 0 , [2 , 2]]] ,
+		'cost': 15 ,
+		'melee': False ,
+	} ,
+	5: {
+		'name': 'Movimento - Direita' ,
+		'active_effect': [['move_card([2,0])' , 0 , .2]] ,
+		'cost': 5 ,
+		'melee': True ,
+	} ,
+	6: {
+		'name': 'Movimento - Cima' ,
+		'active_effect': [['move_card([0,-])' , 0 , .2]] ,
+		'cost': 5 ,
+		'melee': True ,
+	} ,
+	7: {
+		'name': 'Movimento - Baixo' ,
+		'active_effect': [['move_card([0,-])' , 0 , .2]] ,
+		'cost': 5 ,
+		'melee': True ,
+	} ,
+	8: {
+		'name': 'Movimento - Esquerda' ,
+		'active_effect': [['move_card([0,-])' , 0 , .2]] ,
+		'cost': 5 ,
+		'melee': True ,
+	} ,
+	9: {
+		'name': 'Artigo de Luxo' ,
+		'active_effect': [['oil_damage(10)' , 0 , [1 , 1]] , ['poison_damage(5)' , 5 , [1 , 1]]] ,
+		'map_effect': [['oil_damage(5)' , 0 , [2 , 2]]] ,
+		'cost': 7 ,
+		'melee': False ,
+	} ,
+	10: {
+		'name': 'Água Oxigenada 40 Volumes' ,
+		'active_effect': [['poison_damage(-2)' , 0 , .5] , ] ,
+		'map_effect': [['poison_damage(5)' , 0 , [2 , 2]]] ,
+		'cost': 1 ,
+		'melee': True ,
+	},
+	11: {
+		'name': 'Demo com Espada' ,
+		'active_effect': [['poison_damage(4)' , 0 , .5] , ['stress_damage(4)' , 0 , .5] ,
+		                  ['physical_damage(2)', 5 , .5]] ,
+		'cost': 1 ,
+		'melee': True ,
+	},
+
+}
+
 
 ######## Definitions
 
 def set_scene(name , obj):
 	SCENES[name] = obj
+
 
 def calc_relative_size(size , rect = screen_rect):
 	"""
@@ -132,7 +241,7 @@ def calc_relative_size(size , rect = screen_rect):
 	"""
 	# size = list(size)
 	match size:
-		case int(x)|float(x):
+		case int(x) | float(x):
 			return x * rect.w
 		case [x , y]:
 			a = x * rect.w
@@ -146,6 +255,7 @@ def calc_relative_size(size , rect = screen_rect):
 			return [a , b , c , d]
 		case _:
 			raise TypeError
+
 
 def calc_proportional_size(old_size):
 	"""
@@ -167,17 +277,19 @@ def calc_proportional_size(old_size):
 			d = map_proportion.y * h
 			return [a , b , c , d]
 
+
 def equip_item(item , place):
 	for player in players_group:
 		player.equip_item(item , place)
+
 
 def unequip_item(place):
 	for player in players_group:
 		player.unequip_item(place)
 
+
 def change_map_proportion(map_in_use):
 	global map_proportion
 	new_size = map_in_use.get_virtual_size()
 	rect_size = pg.Vector2(screen_rect.size)
-	map_proportion = rect_size.elementwise()/new_size
-	print(map_proportion)
+	map_proportion = rect_size.elementwise() / new_size

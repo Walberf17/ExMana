@@ -33,7 +33,7 @@ class TextBox(pg.sprite.Sprite):
 		self.bg_color = bg_color
 		self.rect = rect
 		self.max_size = rect.w*0.9
-		self.line_h = self.font.size(txt)[1]
+		self.line_h = self.font.size(str(txt))[1]
 		self.lines = self.get_lines()
 		self.cliked = False
 		text_boxes_group.add(self)

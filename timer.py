@@ -16,16 +16,16 @@ screen = pg.display.set_mode((2,3))
 
 class Timer:
 	"""
-	this class works with the time counter
+	this class works with the duration counter
 	this inits
 	update
 	draw
-	calc the remaining time
+	calc the remaining duration
 	"""
 	
 	def __init__(self , timer , command):
 		"""
-		get initial time and what it does when the time is right
+		get initial duration and what it does when the duration is right
 		"""
 		self.initial_time = datetime.now()
 		self.size_timer = timer
@@ -37,7 +37,7 @@ class Timer:
 
 	def update(self):
 		"""
-		check if the time is come
+		check if the duration is come
 		"""
 		if self.running:
 			if datetime.now() >= self.end_time:
