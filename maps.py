@@ -69,15 +69,55 @@ class Maps(pg.sprite.Sprite):
 		# sum effects and interactions
 		self.check_interations()
 
-
 	def check_interations(self):
-		interactions = set()
+		interactions = []
 		for effect in self.effects:
-			interactions.update(effect.check_colision_effect(self.effects))
+			new_interaction = effect.check_collision_effect(self.effects)
+			if new_interaction:
+				for interaction in new_interaction:
+					if interaction and interaction not in interactions:
+						interactions.append(interaction)
+		for effect1 , effect2 , result in EFFECT_INTERACTIONS:
+			test_effect = {effect1 , effect2}
+			for interaction in interactions:
+				kinds = set()
+				duration = None
+				for effect in interaction:
+					kinds.add(effect.get_kind())
+					if duration:
+						duration = min(effect.get_duration() , duration)
+					else:
+						duration = effect.get_duration()
+				if test_effect == kinds:
+					self.add_effect(result , duration)
+
+	def effect_interact(self , effects):
+		durations = []
+		pos_x = 0
+		pos_y = 0
+		size = []
+		for effect in effects:
+			durations.append(effect.get_duration())
+			x , y = effect.get_pos()
+			pos_x += x
+			pos_y += y
+			effect.set_duration(None)
+		return min(durations) , (int(pos_x/2) , int(pos_y/2))
 
 
-	def add_effect(self , effect_idx , pos , area , duration):
-		new_effect = Effect(effect_idx , pos , area , duration , [self.effects , effects_group])
+
+
+	def add_effect(self , idx_effect: int = 1 , pos = None , area = None , duration: int = 0, action = None,):
+		"""
+		Creates a effect somewhere in the
+		:param idx_effect: int with the idx in the images for effects dictionary
+		:param pos: position of the effect
+		:param area: area, in meters of the effect
+		:param duration: int duration of the effect, 0 if instantaneous
+		:param action: if given, a different action will be taken, meaning, only the image from the dict will be used
+		:return: Effect Object
+		"""
+		Effect(idx_effect , pos , area , duration , action , groups = [self.effects , effects_group])
 
 	def effects_update(self):
 		for effect in self.effects:

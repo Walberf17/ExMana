@@ -1,3 +1,3 @@
-a = {3,4}
-
-print(type(a))
+a = None
+b = min(a , 2)
+print(b)

@@ -22,7 +22,7 @@ class Character(pg.sprite.Sprite):
 			images_idx = 1
 		self.images_idx = images_idx
 		this_character_list = CHARACTER_IMAGES_DICT.get(images_idx)
-		sight = [5,10]
+		sight = [5 , 10]
 
 		# default values for this character
 		self.default_strength = 5  # default physical attack
@@ -32,7 +32,7 @@ class Character(pg.sprite.Sprite):
 		self.sex = random.choice(["Male" , "Female"])
 		if self.sex == "Female":
 			self.default_sight_meters *= .9
-			self.default_height -= (random.randrange(0 , 10)/100)
+			self.default_height -= (random.randrange(0 , 10) / 100)
 		self.default_mana = 10
 		self.default_hp = 10
 		self.default_velocity = 5
@@ -62,23 +62,24 @@ class Character(pg.sprite.Sprite):
 
 		self.original_images = pg.image.load(IMAGES_PATH + images).convert_alpha()
 		self.images = self.original_images.copy()
-		self.sprite_grid = self.original_images.get_size()[0] / self.sprite_size[0] , self.original_images.get_size()[1] / \
+		self.sprite_grid = self.original_images.get_size()[0] / self.sprite_size[0] , self.original_images.get_size()[
+			1] / \
 		                   self.sprite_size[1]
 		self.image_index = [0 , 0]
 		self.default_width = self.default_height * self.sprite_size[1] / self.sprite_size[0]
-		self.rect = pg.Rect((0,0),(calc_proportional_size([self.default_height, self.default_width])))
+		self.rect = pg.Rect((0 , 0) , (calc_proportional_size([self.default_height , self.default_width])))
 		self.clicked = False
 		self.status = {}  # status to calc in game
 		self.equipments = {
-			"head"      : None,
-			"r_hand"    : None,
-			"l_hand"    : None,
-			"chest"     : None,
-			"legs"      : None,
-			"feets"     : None,
-			"r_finger"  : None,
-			"l_finger"  : None,
-			"neck"      : None,
+			"head": None ,
+			"r_hand": None ,
+			"l_hand": None ,
+			"chest": None ,
+			"legs": None ,
+			"feets": None ,
+			"r_finger": None ,
+			"l_finger": None ,
+			"neck": None ,
 		}
 		self.bag = {}
 		self.dominant_hand = "r_hand"
@@ -88,11 +89,12 @@ class Character(pg.sprite.Sprite):
 		self.battle_deck = None
 		self.adventure_deck = None
 		self.counter = 0
-		self.time_hud = pg.Rect(0,0,screen_rect.w*.034 , screen_rect.h)
+		self.time_hud = pg.Rect(0 , 0 , screen_rect.w * .034 , screen_rect.h)
 		self.proportion_time_velocity = .2
+		self.effects = []
+		characters_group.add(self)
 		self.calc_status()
 		self.change_size_proportion()
-
 
 	### Change things for the game
 
@@ -127,8 +129,8 @@ class Character(pg.sprite.Sprite):
 		i , j = self.image_index
 		n_w , n_h = size
 		max_i , max_j = self.sprite_grid
-		w = n_w/max_i
-		h = n_h/max_j
+		w = n_w / max_i
+		h = n_h / max_j
 		init_x = self.rect.left + (w * i)
 		init_y = self.rect.top + (h * j)
 		return pg.Rect(init_x , init_y , w , h)
@@ -139,15 +141,15 @@ class Character(pg.sprite.Sprite):
 		Change the rect and the images
 		:return: None
 		"""
-		self.rect = pg.Rect((random.randrange(800) , random.randrange(800)) , calc_proportional_size((self.width , self.height)))
+		self.rect = pg.Rect((random.randrange(800) , random.randrange(800)) ,
+		                    calc_proportional_size((self.width , self.height)))
 		self.sight_pixels = calc_proportional_size(self.sight_meters)
 		self.melee_pixels = calc_proportional_size(self.melee_meters)
 		if self.images:
 			self.images = pg.transform.scale(self.original_images ,
 			                                 (self.rect.w * self.sprite_grid[0] , self.rect.h * self.sprite_grid[1]))
-			# new_size = pg.Vector2(self.images.get_size())
-			# self.sprite_size = new_size.elementwise() * self.sprite_grid
-
+		# new_size = pg.Vector2(self.images.get_size())
+		# self.sprite_size = new_size.elementwise() * self.sprite_grid
 
 	### interactions with the player
 	def click_down(self , event):
@@ -185,18 +187,13 @@ class Character(pg.sprite.Sprite):
 		"""
 		if self.images:  # draw the image, if any
 			new_surf = pg.Surface((self.rect.size)).convert_alpha()
-			new_surf.fill([0,0,0,0])
-			new_surf.blit(self.images , (0,0) , self.create_rect_to_draw())
-			screen_to_draw.blit(new_surf, self.rect)
+			new_surf.fill([0 , 0 , 0 , 0])
+			new_surf.blit(self.images , (0 , 0) , self.create_rect_to_draw())
+			screen_to_draw.blit(new_surf , self.rect)
 		else:  # draw a rect to debug
 			pg.draw.rect(screen_to_draw , "red" , self.rect)
 		pg.draw.rect(screen_to_draw , "green" , self.rect , 1)
 		pg.draw.rect(screen_to_draw , "red" , self.time_hud)
-		# self.draw_range(screen_to_draw, False)
-
-		# for debug
-		# txt = main_menu_font.render(str(self.duration) , True , "red" , "black")
-		# screen_to_draw.blit(txt , (0,0))
 
 	def draw_range(self , screen_to_draw , meele = True):
 		"""
@@ -207,31 +204,31 @@ class Character(pg.sprite.Sprite):
 		"""
 		melee_dist = self.melee_pixels
 		if meele:  # draws a smaller circle, with the range of the meelee attack
-			new_surf = pg.Surface([melee_dist*2]* 2).convert_alpha()
-			new_surf.fill([0,0,0,0])
+			new_surf = pg.Surface([melee_dist * 2] * 2).convert_alpha()
+			new_surf.fill([0 , 0 , 0 , 0])
 			new_surf_rect = new_surf.get_rect()
-			pg.draw.circle(new_surf , [0,0,255,150] , (new_surf_rect.w/2,new_surf_rect.h/2) , melee_dist)
-			pg.draw.circle(new_surf , [0,0,0,0] , (new_surf_rect.w/2,new_surf_rect.h/2) , melee_dist /2)
-		else: # draws a smaller circle, based on the sight_pixels of the character
+			pg.draw.circle(new_surf , [0 , 0 , 255 , 150] , (new_surf_rect.w / 2 , new_surf_rect.h / 2) , melee_dist)
+		# pg.draw.circle(new_surf , [0,0,0,0] , (new_surf_rect.w/2,new_surf_rect.h/2) , melee_dist /2)
+		else:  # draws a smaller circle, based on the sight_pixels of the character
 			sight_dist = self.sight_pixels
-			new_surf = pg.Surface([sight_dist*2] * 2).convert_alpha()
-			new_surf.fill([0,0,0 , 0])
+			new_surf = pg.Surface([sight_dist * 2] * 2).convert_alpha()
+			new_surf.fill([0 , 0 , 0 , 0])
 			new_surf_rect = new_surf.get_rect()
-			pg.draw.circle(new_surf , [0 , 0 , 255 , 150] , (new_surf_rect.w/2,new_surf_rect.h/2) , sight_dist)
-			pg.draw.circle(new_surf , [0 , 0 , 0 , 0] , (new_surf_rect.w/2,new_surf_rect.h/2) , melee_dist)
+			pg.draw.circle(new_surf , [0 , 0 , 255 , 150] , (new_surf_rect.w / 2 , new_surf_rect.h / 2) , sight_dist)
+			pg.draw.circle(new_surf , [0 , 0 , 0 , 0] , (new_surf_rect.w / 2 , new_surf_rect.h / 2) , melee_dist)
 
 		new_surf_rect.center = self.rect.center
 		# pg.draw.rect(screen_to_draw , "black" , new_surf_rect)
 		screen_to_draw.blit(new_surf , new_surf_rect)
 
 	def draw_equip_screen(self , screen_to_draw , screen_to_draw_rect):
-		size = pg.Vector2(screen_to_draw_rect.size).elementwise()*(2 ,.5)
+		size = pg.Vector2(screen_to_draw_rect.size).elementwise() * (2 , .5)
 		image = pg.transform.scale(self.images , size)
 		new_rect = image.get_rect()
 		new_clamp_rect = self.create_rect_to_draw_in_status(size)
 		new_rect.size = new_clamp_rect.size
 		new_rect.midleft = screen_to_draw_rect.center
-		pg.draw.rect(screen_to_draw , "red" ,new_rect , 4)
+		pg.draw.rect(screen_to_draw , "red" , new_rect , 4)
 		screen_to_draw.blit(image , new_rect , new_clamp_rect)
 
 	def update(self):
@@ -242,15 +239,51 @@ class Character(pg.sprite.Sprite):
 		# updates the image
 		if self.images:
 			self.counter += 1
-			self.image_index[0] = int((self.counter * self.velocity / (2*FPS)) % (self.sprite_grid[0]))
+			self.image_index[0] = int((self.counter * self.velocity / (2 * FPS)) % (self.sprite_grid[0]))
 
 		# updates the hud of duration
 		if self.time > 0:
-			self.time += - 1/FPS
-			dtime = self.time/self.default_time
-			self.time_hud.h = screen_rect.h*dtime
+			self.time += - 1 / FPS
+			dtime = self.time / self.default_time
+			self.time_hud.h = screen_rect.h * dtime
 			self.time_hud.bottomright = screen_rect.bottomright
 
+		# check hp
+		if self.hp <= (0 - self.will // 10):
+			self.kill()
+
+	def check_in_range(self , pos , melee):
+		center = pg.Vector2(self.rect.center)
+		dist = center.distance_to(pos)
+		if melee:
+			return dist <= self.melee_pixels
+		else:
+			return self.sight_pixels >= dist >= self.melee_pixels
+
+	def check_cost(self , cost):
+		if type(cost) == int:
+			return self.time >= cost
+		else:
+			time_cost , mana_cost = cost
+			return all([self.time >= time_cost , self.mana >= mana_cost])
+
+	def consume_cost(self , cost):
+		if type(cost) == int:
+			self.time -= cost
+		else:
+			time_cost , mana_cost = cost
+			self.time -= time_cost
+			self.mana -= mana_cost
+
+	def get_mask(self):
+		new_surf = pg.Surface(self.rect.size).convert_alpha()
+		new_surf.fill([0 , 0 , 0 , 0])
+		new_surf.blit(self.images , (0 , 0) , self.create_rect_to_draw())
+		mask = pg.mask.from_surface(new_surf)
+		return mask
+
+	def kill(self):
+		super().kill()
 
 	# change Default Status
 
@@ -444,7 +477,6 @@ class Character(pg.sprite.Sprite):
 		"""
 		self.mana += value
 
-
 	# actions
 
 	def move_card(self , value):
@@ -507,7 +539,7 @@ class Character(pg.sprite.Sprite):
 		self.mana = mana
 		self.hp = hp
 		self.velocity = velocity
-		self.default_time = self.time = time + self.proportion_time_velocity*self.velocity
+		self.default_time = self.time = time + self.proportion_time_velocity * self.velocity
 		self.will = will
 		self.wisdom = wisdow
 		self.width = self.height * self.sprite_size[1] / self.sprite_size[0]
@@ -551,17 +583,17 @@ class Character(pg.sprite.Sprite):
 		:return: dict
 		"""
 		status_dict = {
-		"strength" : self.strength,
-		"resilience" : self.resilience,
-		"height" : self.height,
-		"sight_meters" : self.sight_meters,
-		"mana" : self.mana,
-		"hp" : self.hp,
-		"velocity" : self.velocity,
-		"duration" : self.time,
-		"will" : self.will,
-		"wisdom" : self.wisdom,
-		"melee_meters" : self.melee_meters,
+			"strength": self.strength ,
+			"resilience": self.resilience ,
+			"height": self.height ,
+			"sight_meters": self.sight_meters ,
+			"mana": self.mana ,
+			"hp": self.hp ,
+			"velocity": self.velocity ,
+			"duration": self.time ,
+			"will": self.will ,
+			"wisdom": self.wisdom ,
+			"melee_meters": self.melee_meters ,
 		}
 		return status_dict
 
@@ -573,6 +605,25 @@ class Character(pg.sprite.Sprite):
 		return self.equipments
 
 	# Effects
+
+	def add_effects(self , effect , duration):
+		if duration == 0:
+			eval(f'self.{effect}')
+		else:
+			self.effects.add([effect , duration])
+
+	def do_effects(self):
+		to_remove = []
+		for idx , effect_list in self.effects:
+			effect , duration = effect_list
+			duration -= 1
+			eval(f'self.{effect}')
+			self.effects[idx] = [effect , duration]
+			if duration == 0:
+				to_remove.append(idx)
+		for idx in to_remove:
+			self.effects.pop(idx)
+		to_remove.clear()
 
 	def fire_damage(self , value: int = -2):
 		"""
@@ -680,7 +731,7 @@ class Character(pg.sprite.Sprite):
 			value = max(0 , value - self.wisdom)
 		else:
 			value = min(0 , value - self.wisdom)
-		self.change_hp(4*value)
+		self.change_hp(4 * value)
 
 	def gravity_damage(self , value: int = -2):
 		"""
@@ -714,16 +765,16 @@ class Character(pg.sprite.Sprite):
 		"""
 		self.change_hp(value)
 
-	def stress_damage(self  , value: int = -2):
+	def stress_damage(self , value: int = -2):
 		"""
 		Deals stress damage to this character. Change if needed.
 		:param value:
 		:return:
 		"""
 		if value > 0:
-			value = max(0 , value - self.wisdom-random.randint(self.will))
+			value = max(0 , value - self.wisdom - random.randint(self.will))
 		else:
-			value = min(0 , value - self.wisdom-random.randint(self.will))
+			value = min(0 , value - self.wisdom - random.randint(self.will))
 		self.change_hp(value)
 
 	def physical_damage(self , value: int = -2):
@@ -743,7 +794,7 @@ class Character(pg.sprite.Sprite):
 			value = max(0 , value - self.resilience)
 		else:
 			value = min(0 , value - self.resilience)
-		self.velocity -= int(value/2)
+		self.velocity -= int(value / 2)
 		self.change_hp(value)
 
 	def calc_new_size(self):
@@ -755,24 +806,24 @@ class Character(pg.sprite.Sprite):
 
 	def save_player(self):
 		new_dict = {
-			'images_idx'            :       self.images_idx,
-			'default_strength'      :       self.default_strength ,
-			'default_resilience'    :       self.default_resilience ,
-			'default_height'        :       self.default_height ,
-			'default_sight_meters'  :       self.default_sight_meters ,
-			'sex'                   :       self.sex ,
-			'default_mana'          :       self.default_mana ,
-			'default_hp'            :       self.default_hp ,
-			'default_velocity'      :       self.default_velocity ,
-			'default_time'          :       self.default_time ,
-			'default_will'          :       self.default_will ,
-			'default_wisdom'        :       self.default_wisdom ,
-			'default_melee_dist'    :       self.default_melee_dist ,
-			'level'                 :       self.level ,
-			'bag'                   :       self.bag,
-			'equipments'            :       self.equipments,
-			'dominant_hand'         :       self.dominant_hand,
-			'other_hand'            :       self.other_hand,
+			'images_idx': self.images_idx ,
+			'default_strength': self.default_strength ,
+			'default_resilience': self.default_resilience ,
+			'default_height': self.default_height ,
+			'default_sight_meters': self.default_sight_meters ,
+			'sex': self.sex ,
+			'default_mana': self.default_mana ,
+			'default_hp': self.default_hp ,
+			'default_velocity': self.default_velocity ,
+			'default_time': self.default_time ,
+			'default_will': self.default_will ,
+			'default_wisdom': self.default_wisdom ,
+			'default_melee_dist': self.default_melee_dist ,
+			'level': self.level ,
+			'bag': self.bag ,
+			'equipments': self.equipments ,
+			'dominant_hand': self.dominant_hand ,
+			'other_hand': self.other_hand ,
 		}
 		return new_dict
 

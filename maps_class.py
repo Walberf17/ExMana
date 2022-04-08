@@ -111,7 +111,7 @@ class MapGrid(Grid):
 		self.update_map_effects()
 
 	def check_interactions(self):
-		for effect1 , effect2 , new_effect in effect_interations:
+		for effect1 , effect2 , new_effect in EFFECT_INTERACTIONS:
 			for cell in self.map_effects:
 				if effect1 in self.map_effects[cell] and effect2 in self.map_effects[cell]:
 					if new_effect:

@@ -9,7 +9,7 @@ from variables_and_definitions import *
 
 
 class Button(pg.sprite.Sprite):
-	def __init__(self , relative_size: tuple|list , action: str = None , image: str = None , txt = None , action_on_click = False , colors = ['orange' , 'orange4' , 'orange2']):
+	def __init__(self , relative_size: tuple|list , action = None , image: str = None , txt = None , action_on_click = False , colors = None , groups= None):
 		"""
 		It creates a rect in the screen, and does a action when interacted. If calls update, when hoovered it slightly change the color.
 		:param relative_size: a list or tuple with float numbers from 0 to 1.0
@@ -19,7 +19,11 @@ class Button(pg.sprite.Sprite):
 		:param action_on_click: bool
 		:param colors: list of pg.color
 		"""
-		super().__init__()
+		if groups is None:
+			groups = []
+		super().__init__(*groups)
+		if colors is None:
+			colors = ['orange' , 'orange4' , 'orange2']
 		self.rect = pg.Rect(calc_relative_size(relative_size))
 		self.action = action
 		self.image = image
@@ -28,7 +32,6 @@ class Button(pg.sprite.Sprite):
 		self.color = 0
 		self.colors = colors
 		self.txt = txt
-		buttons_group.add(self)
 
 	def draw(self , screen_to_draw):
 		"""
@@ -125,7 +128,8 @@ class Button(pg.sprite.Sprite):
 		:return: None
 		"""
 		if self.action:
-			eval(self.action)
+			self.action()
+
 				
 	def update(self):
 		"""
