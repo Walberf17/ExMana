@@ -9,6 +9,15 @@ from variables_and_definitions import *
 class Effect(pg.sprite.Sprite):
 	def __init__(self , idx_effect: str = "Fire" , pos = None , area = None , duration: int = 1 , action = None ,
 	             groups: list = None):
+		"""
+
+		:param idx_effect: str with the name of the image
+		:param pos: center of the effect's rect
+		:param area: area, in meters of the effect
+		:param duration: int with the duration of the effect
+		:param action: str: the actual effect of this effect
+		:param groups: list of groups for the effect to be inserted
+		"""
 		if pos is None:
 			pos = [0 , 0]
 		if groups is None:

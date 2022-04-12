@@ -107,7 +107,7 @@ class Maps(pg.sprite.Sprite):
 
 
 
-	def add_effect(self , idx_effect: int = 1 , pos = None , area = None , duration: int = 0, action = None,):
+	def add_effect(self , idx_effect: str = 'Fire' , pos = None , area = None , duration: int = 0, action = None,):
 		"""
 		Creates a effect somewhere in the
 		:param idx_effect: int with the idx in the images for effects dictionary

@@ -13,11 +13,15 @@ class Character(pg.sprite.Sprite):
 	This class is a base class for other players and monsters
 	"""
 
-	def __init__(self , images_idx = None):
+	def __init__(self , images_idx = None , groups = None):
 		"""
 		:param images_idx: int
 		"""
-		super().__init__()
+		if groups is None:
+			groups = []
+		elif type(groups) != list:
+			groups = [groups]
+		super().__init__(*groups)
 		if images_idx is None:
 			images_idx = 1
 		self.images_idx = images_idx

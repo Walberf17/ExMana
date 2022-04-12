@@ -18,7 +18,7 @@ class Deck:
 	    shuffle the cards in the deck.
 	    move cards from and to deck, drawn or discard cards.
 	"""
-	def __init__(self , card_indexes , deck_rect , hand_rect , player):
+	def __init__(self , card_indexes , deck_rect , hand_rect , map_rect , player):
 		self.player = player
 		self.deck_group = []
 		self.hand = pg.sprite.Group()
@@ -26,8 +26,8 @@ class Deck:
 		self.card_indexes = card_indexes
 		self.deck_rect = pg.Rect(calc_proportional_size(deck_rect))
 		self.hand_rect = pg.Rect(calc_proportional_size(hand_rect))
-		for player in players_group:
-			self.player = player
+		self.map_rect = map_rect
+		self.player = player
 		self.create_deck()
 
 
@@ -98,7 +98,7 @@ class Deck:
 
 	def click_up(self , event):
 		for card in self.hand:
-			if card.click_up(event , self.hand_rect):
+			if card.click_up(event , self.map_rect):
 				self.card_hand_to_discard(card)
 
 
@@ -140,17 +140,18 @@ class Card(pg.sprite.Sprite):
 			self.touched = True
 			return True
 
-	def click_up(self , event , hand_map):
+	def click_up(self , event , map_rect):
 		"""
 		:param event: pg.Event type
 		:return:
 		"""
-		self.touched = False
-		if not self.rect.colliderect(hand_map):
-			if self.player.check_in_range(self.rect.center , self.melee):
-				if self.player.check_cost(self.cost):
-					self.do_action()
-		return True
+		if self.touched:
+			self.touched = False
+			if map_rect.collidepoint(self.rect.center):
+				if self.player.check_in_range(self.rect.center , self.melee):
+					if self.player.check_cost(self.cost):
+						self.do_action()
+			return True
 
 	def do_action(self):
 		self.player.consume_cost(self.cost)
@@ -160,7 +161,7 @@ class Card(pg.sprite.Sprite):
 			self.do_map_effects()
 
 	def do_active_effects(self):
-		for effect , duration , size in self.active_effects:
+		for kind , effect , duration , size in self.active_effects:
 			center = pg.Vector2(self.rect.center)
 			size = calc_proportional_size(size)
 			for character in characters_group:
@@ -168,9 +169,10 @@ class Card(pg.sprite.Sprite):
 					character.add_effects(effect , duration)
 
 	def do_map_effects(self):
+		pos = pg.mouse.get_pos()
 		for current_map in maps_group:
-			pass
-
+			for kind , action , duration , area in self.map_effect:
+				current_map.add_effects(effect_index = kind , pos = pos , area = area , duration = duration , action = action)
 
 	def update(self , hand_cards):
 		"""

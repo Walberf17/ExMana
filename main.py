@@ -30,7 +30,9 @@ from deck_and_cards import Deck , Card
 from characters import Character
 from maps import Maps
 
-
+map_rect = pg.Rect(0,0,screen_rect.w , screen_rect.y*.8)
+hand_map = pg.Rect(0,0,screen_rect.w , screen_rect.y*.2)
+hand_map.bottom = screen_rect.bottom
 maps = Maps(2, screen_rect)
 maps.add_effect(idx_effect = 'Fire' , pos = (250,250), duration = 1)
 maps.add_effect(idx_effect = 'Fire' , pos = (300,300) , area = (2,2) , duration = 2)
