@@ -7,8 +7,12 @@ from variables_and_definitions import *
 
 
 class Effect(pg.sprite.Sprite):
-	def __init__(self , idx_effect: str = "Fire" , pos = None , area = None , duration: int = 1 , action = None ,
-	             groups: list = None):
+	"""
+	This class sets the effects
+	it inits
+	"""
+
+	def __init__(self , idx_effect: str = "Fire" , pos = None , area = None , duration: int = 1 , action = None , groups: list = None):
 		"""
 
 		:param idx_effect: str with the name of the image
@@ -33,10 +37,11 @@ class Effect(pg.sprite.Sprite):
 		self.images = None
 		self.sprite_grid = None
 		self.sprite_size = None
-		self.action = action
 		self.counter = 0
 		self.duration = duration
 		self.get_info()
+		if action:
+			self.action = action
 		self.image_index = [0 , 0]
 		self.image_index_differ = random.randint(0 , self.sprite_grid[0])
 

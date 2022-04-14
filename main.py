@@ -1,9 +1,7 @@
 """
 
 Doing now:
-	map and effects
-	do map effect in card
-	effect check_effect_on_obj
+	working on animations class
 
 Things to do:
 	Maps

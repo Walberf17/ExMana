@@ -4,34 +4,36 @@ This is a internal class, a class that will be a base for other.
 This class will create a character and give it default actions.
 """
 import random
-
+from pygame.sprite import Sprite
 from variables_and_definitions import *
+from animations import Animations
 
 
-class Character(pg.sprite.Sprite):
+class Character(Sprite , Animations):
 	"""
 	This class is a base class for other players and monsters
 	"""
 
 	def __init__(self , images_idx = None , groups = None):
 		"""
-		:param images_idx: int
+
+		:param images_idx: image from the dictionary to get
+		:param groups: groups to add
 		"""
+		self.default_height = random.randrange(160 , 210) / 100
+		self.default_width = random.randrange(30 , 60) / 100
+
+		Animations().__init__(images_idx = images_idx , area = [self.default_width , self.default_height] , dict_with_image = CHARACTER_IMAGES_DICT)
 		if groups is None:
 			groups = []
 		elif type(groups) != list:
 			groups = [groups]
-		super().__init__(*groups)
-		if images_idx is None:
-			images_idx = 1
-		self.images_idx = images_idx
-		this_character_list = CHARACTER_IMAGES_DICT.get(images_idx)
+		Sprite().__init__(*groups)
 		sight = [5 , 10]
 
 		# default values for this character
 		self.default_strength = 5  # default physical attack
 		self.default_resilience = 5  # default physical resilience
-		self.default_height = random.randrange(160 , 210) / 100
 		self.default_sight_meters = random.randrange(sight[0] , sight[1])
 		self.sex = random.choice(["Male" , "Female"])
 		if self.sex == "Female":
@@ -60,17 +62,6 @@ class Character(pg.sprite.Sprite):
 		self.melee_meters = self.default_melee_dist
 		self.melee_pixels = calc_proportional_size(self.melee_meters)
 
-		if this_character_list is None:
-			this_character_list = CHARACTER_IMAGES_DICT.get(1)
-		images , self.sprite_size = this_character_list
-
-		self.original_images = pg.image.load(IMAGES_PATH + images).convert_alpha()
-		self.images = self.original_images.copy()
-		self.sprite_grid = self.original_images.get_size()[0] / self.sprite_size[0] , self.original_images.get_size()[
-			1] / \
-		                   self.sprite_size[1]
-		self.image_index = [0 , 0]
-		self.default_width = self.default_height * self.sprite_size[1] / self.sprite_size[0]
 		self.rect = pg.Rect((0 , 0) , (calc_proportional_size([self.default_height , self.default_width])))
 		self.clicked = False
 		self.status = {}  # status to calc in game
@@ -92,17 +83,26 @@ class Character(pg.sprite.Sprite):
 		self.side_deck = None
 		self.battle_deck = None
 		self.adventure_deck = None
-		self.counter = 0
 		self.time_hud = pg.Rect(0 , 0 , screen_rect.w * .034 , screen_rect.h)
 		self.proportion_time_velocity = .2
 		self.effects = []
-		characters_group.add(self)
 		self.calc_status()
-		self.change_size_proportion()
+
 
 	### Change things for the game
 
-	def set_deck(self , deck , adventure):
+	def change_sizes_proportion(self):
+		"""
+		Change the rect and stuff proportionally to the current map.
+		Change the rect and the images
+		:return: None
+		"""
+		Animations().change_size_proportion()
+		self.sight_pixels = calc_proportional_size(self.sight_meters)
+		self.melee_pixels = calc_proportional_size(self.melee_meters)
+
+
+	def set_deck(self , deck = None , adventure = None):
 		"""
 		Set a deck to the player.
 		:param deck: Deck object
@@ -114,16 +114,7 @@ class Character(pg.sprite.Sprite):
 		else:
 			self.battle_deck = deck
 
-	def create_rect_to_draw(self):
-		"""
-		creates a rect to draw the correct sprite
-		:return: None
-		"""
-		i , j = self.image_index
-		w , h = self.rect.size
-		init_x = (w * i)
-		init_y = (h * j)
-		return pg.Rect(init_x , init_y , w , h)
+
 
 	def create_rect_to_draw_in_status(self , size):
 		"""
@@ -138,22 +129,6 @@ class Character(pg.sprite.Sprite):
 		init_x = self.rect.left + (w * i)
 		init_y = self.rect.top + (h * j)
 		return pg.Rect(init_x , init_y , w , h)
-
-	def change_size_proportion(self):
-		"""
-		Change the rect and stuff proportionally to the current map.
-		Change the rect and the images
-		:return: None
-		"""
-		self.rect = pg.Rect((random.randrange(800) , random.randrange(800)) ,
-		                    calc_proportional_size((self.width , self.height)))
-		self.sight_pixels = calc_proportional_size(self.sight_meters)
-		self.melee_pixels = calc_proportional_size(self.melee_meters)
-		if self.images:
-			self.images = pg.transform.scale(self.original_images ,
-			                                 (self.rect.w * self.sprite_grid[0] , self.rect.h * self.sprite_grid[1]))
-		# new_size = pg.Vector2(self.images.get_size())
-		# self.sprite_size = new_size.elementwise() * self.sprite_grid
 
 	### interactions with the player
 	def click_down(self , event):
@@ -189,13 +164,7 @@ class Character(pg.sprite.Sprite):
 		:param screen_to_draw: pg.Surface
 		:return: None
 		"""
-		if self.images:  # draw the image, if any
-			new_surf = pg.Surface((self.rect.size)).convert_alpha()
-			new_surf.fill([0 , 0 , 0 , 0])
-			new_surf.blit(self.images , (0 , 0) , self.create_rect_to_draw())
-			screen_to_draw.blit(new_surf , self.rect)
-		else:  # draw a rect to debug
-			pg.draw.rect(screen_to_draw , "red" , self.rect)
+		Animations().draw(screen_to_draw)
 		pg.draw.rect(screen_to_draw , "green" , self.rect , 1)
 		pg.draw.rect(screen_to_draw , "red" , self.time_hud)
 
@@ -235,15 +204,14 @@ class Character(pg.sprite.Sprite):
 		pg.draw.rect(screen_to_draw , "red" , new_rect , 4)
 		screen_to_draw.blit(image , new_rect , new_clamp_rect)
 
-	def update(self):
+	def update(self , **kwargs):
 		"""
 		updates the image index.
+		:param **kwargs:
 		:return: None
 		"""
 		# updates the image
-		if self.images:
-			self.counter += 1
-			self.image_index[0] = int((self.counter * self.velocity / (2 * FPS)) % (self.sprite_grid[0]))
+		Animations().update()
 
 		# updates the hud of duration
 		if self.time > 0:
@@ -291,20 +259,6 @@ class Character(pg.sprite.Sprite):
 
 	# change Default Status
 
-	def change_images_idx(self , value):
-		self.images_idx = value
-		this_character_list = CHARACTER_IMAGES_DICT.get(value)
-		if this_character_list is None:
-			this_character_list = CHARACTER_IMAGES_DICT.get(1)
-		images , self.sprite_size = this_character_list
-		self.original_images = pg.image.load(IMAGES_PATH + images).convert_alpha()
-		self.images = self.original_images.copy()
-		self.sprite_grid = self.original_images.get_size()[0] / self.sprite_size[0] , \
-		                   self.original_images.get_size()[1] / self.sprite_size[1]
-		self.image_index = [0 , 0]
-		self.default_width = self.default_height * self.sprite_size[1] / self.sprite_size[0]
-		self.change_size_proportion()
-
 	def change_default_strength(self , value):
 		"""
 		change the strength parameter of the character.
@@ -322,7 +276,16 @@ class Character(pg.sprite.Sprite):
 		self.default_resilience += value
 
 	def change_default_height(self , value):
-		self.default_height += value
+		proport = 1+(value/self.default_height)
+		self.default_height *= proport
+		self.area[1] *= proport
+		self.change_sizes_proportion()
+
+	def change_default_width(self):
+		proport = 1 + (value / self.default_width)
+		self.default_width *= proport
+		self.area[0] *= proport
+		self.change_sizes_proportion()
 
 	def change_default_sight(self , value):
 		self.default_sight_meters += value
@@ -851,4 +814,4 @@ class Character(pg.sprite.Sprite):
 		self.dominant_hand = new_dict.get('dominant_hand')
 		self.other_hand = new_dict.get('other_hand')
 		self.calc_status()
-		self.change_size_proportion()
+		self.change_sizes_proportion()

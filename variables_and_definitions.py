@@ -274,7 +274,7 @@ def calc_proportional_size(old_size):
 	match old_size:
 		case int(x) | float(x):
 			return map_proportion.x * x
-		case [x , y]:
+		case [x , y] | (x , y):
 			a = map_proportion.x * x
 			b = map_proportion.y * y
 			return [a , b]
