@@ -23,6 +23,7 @@ buttons_main_scene = pg.sprite.Group()
 buttons_equip_scene = pg.sprite.Group()
 selection_group = pg.sprite.Group()
 effects_group = pg.sprite.Group()
+moving_objects_group = set()
 
 
 ######## Variables
@@ -118,11 +119,11 @@ EFFECT_INTERACTIONS = [
 
 ######## dicts and lists
 scene_test_dict = {
-	"draw": [maps_group , text_boxes_group , monsters_group , selection_group , players_group , cards_group ,
-	         items_group , buttons_group] ,
-	"click_down": [buttons_group , selection_group , players_group] ,
+	"draw": [maps_group , text_boxes_group , monsters_group , selection_group , players_group ,
+	         cards_group , items_group , buttons_group] ,
+	"click_down": [buttons_group , selection_group , moving_objects_group] ,
 	"update": [buttons_group , maps_group , players_group , selection_group] ,
-	"move": [buttons_group , players_group , selection_group]
+	"move": [buttons_group , selection_group , moving_objects_group]
 }
 
 EQUIPAMENTS_DICT = {  # name:str , description:str , place:str , modifiers: dict of status to modify and number
@@ -248,10 +249,5 @@ CARDS_DICT = {
 	},
 
 }
-
-
-######## Definitions
-
-
 
 

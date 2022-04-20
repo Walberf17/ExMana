@@ -6,7 +6,7 @@ from animations import Animations
 from variables import *
 from definitions import *
 from pygame.sprite import Sprite
-
+from moving_object import MovingObj
 
 class Effect(Sprite , Animations):
 	"""
@@ -25,14 +25,14 @@ class Effect(Sprite , Animations):
 		:param groups: list of groups for the effect to be inserted
 		"""
 		if pos is None:
-			pos = rect_to_be.topleft
+			pos = rect_to_be.center
 		if groups is None:
 			groups = []
 		Sprite.__init__(self , *groups)
 		if area is None:
 			area = [1 , 1]
 		self.name = idx_effect
-		Animations.__init__(self , self.name , area , EFFECT_DICT , rect_to_be = rect_to_be)
+		Animations.__init__(self , images_idx = self.name , area = area , dict_with_image = EFFECT_DICT , rect_to_be = rect_to_be , pos = pos)
 		self.duration = duration
 		if action is None:
 			action = EFFECT_INFO.get(self.images_idx)
@@ -40,17 +40,6 @@ class Effect(Sprite , Animations):
 		self.image_index = [0 , 0]
 		self.image_index_differ = random.randint(0 , self.sprite_grid[0])
 
-
-	def change_size_proportion(self):
-		"""
-		Change the rect and stuff proportionally to the current map.
-		Change the rect and the images
-		:return: None
-		"""
-		self.rect = pg.Rect(self.rect.center , calc_proportional_size(self.area))
-		if self.images:
-			self.images = pg.transform.scale(self.original_images ,
-			                                 (self.rect.w * self.sprite_grid[0] , self.rect.h * self.sprite_grid[1]))
 
 	def draw(self , screen_to_draw):
 		Animations.draw(self , screen_to_draw)

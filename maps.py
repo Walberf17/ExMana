@@ -30,7 +30,7 @@ class Maps(Sprite , Animations):
 			item_dict = {}
 		self.area , self.name = MAPS_INFO.get(idx_map)
 		change_map_proportion(self , rect)
-		Animations.__init__(self , idx_map , self.area , MAPS_IMAGES_DICT , rect_to_be = rect)
+		Animations.__init__(self , images_idx = idx_map , area = self.area , dict_with_image = MAPS_IMAGES_DICT , rect_to_be = rect)
 		self.secrets = item_dict
 		self.effects = pg.sprite.Group()
 		self.rect.topleft = rect.topleft
@@ -49,12 +49,13 @@ class Maps(Sprite , Animations):
 		self.draw_effects(screen_to_draw)
 
 	def draw_effects(self , screen_to_draw):
-		surf_effects = pg.Surface(self.rect.size).convert_alpha()
+		surf_effects = pg.Surface(screen_rect.size).convert_alpha()
 		surf_effects.fill([0,0,0,0])
 		for effect in self.effects:
 			effect.draw(surf_effects)
 		surf_effects.set_alpha(100)
-		screen_to_draw.blit(surf_effects , (0,0))
+		screen_to_draw.blit(surf_effects , self.rect_to_be , self.rect_to_be)
+		# pg.draw.rect(screen_to_draw , 'red' , self.rect_to_be , 6)
 
 	def update(self):
 		"""

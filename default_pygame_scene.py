@@ -236,8 +236,6 @@ class Scene:
 		Loops throught self.to_move and 
 		calls --> obj.move()		
 		"""
-		# pg.mouse.get_rel()
-		# print(self.to_move)
 		for c_list in self.to_move:
 			for obj in c_list:
 				obj.move()

@@ -9,7 +9,9 @@ import random
 
 
 class Animations:
-	def __init__(self , images_idx = 1 , area = (1 , 1) , dict_with_image = CHARACTER_IMAGES_DICT , rect_to_be = screen_rect):
+	def __init__(self , images_idx = 1 , area = (1 , 1) ,
+	             dict_with_image = CHARACTER_IMAGES_DICT , rect_to_be = screen_rect ,
+	             pos = None):
 		"""
 		:param images_idx: int
 		:param groups: groups to add
@@ -38,6 +40,10 @@ class Animations:
 		self.image_index = [0 , 0]
 		self.area = area
 		self.rect = pg.Rect(self.rect_to_be.topleft , (calc_proportional_size(self.area)))
+		if pos:
+			self.rect.center = pos
+		else:
+			self.rect.center = self.rect_to_be.center
 		self.image_index = [0 , 0]
 		self.counter = 0
 		self.change_size_proportion()
@@ -76,6 +82,7 @@ class Animations:
 			screen_to_draw.blit(new_surf , self.rect)
 		else:  # draw a rect to debug
 			pg.draw.rect(screen_to_draw , "red" , self.rect)
+		# pg.draw.rect(screen_to_draw , 'green' , self.rect,10)
 
 	def update(self , velocity = 6):
 		if self.images:

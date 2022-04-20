@@ -8,9 +8,10 @@ from pygame.sprite import Sprite
 from variables import *
 from definitions import *
 from animations import Animations
+from moving_object import MovingObj
 
 
-class Character(Sprite , Animations):
+class Character(Sprite , Animations , MovingObj):
 	"""
 	This class is a base class for other players and monsters
 	"""
@@ -24,6 +25,7 @@ class Character(Sprite , Animations):
 		if groups is None:
 			groups = []
 		Sprite.__init__(self, *groups)
+		# MovingObj.__init__(self)
 		self.default_height = random.randrange(160 , 210) / 100
 		self.default_width = random.randrange(30 , 60) / 100
 		Animations.__init__(self , images_idx = images_idx , area = [self.default_width , self.default_height] , dict_with_image = CHARACTER_IMAGES_DICT , rect_to_be = rect_to_be)
@@ -126,32 +128,6 @@ class Character(Sprite , Animations):
 		return pg.Rect(init_x , init_y , w , h)
 
 	### interactions with the player
-	def click_down(self , event):
-		"""
-		for debug
-		:param event: pg.Event
-		:return: Bool
-		"""
-		pg.mouse.get_rel()
-		if self.rect.collidepoint(event.pos):
-			self.clicked = True
-		return self.clicked
-
-	def move(self):
-		"""
-		for debug
-		:return: None
-		"""
-		if self.clicked:
-			mouse_move = pg.mouse.get_rel()
-			self.rect.move_ip(mouse_move)
-
-	def click_up(self , event):
-		"""
-		for debug
-		:return: None
-		"""
-		self.clicked = False
 
 	def draw(self , screen_to_draw):
 		"""
@@ -162,7 +138,6 @@ class Character(Sprite , Animations):
 		Animations.draw(self , screen_to_draw)
 		pg.draw.rect(screen_to_draw , "green" , self.rect , 1)
 		pg.draw.rect(screen_to_draw , "red" , self.time_hud)
-		self.draw_range(screen_to_draw , False)
 
 	def draw_range(self , screen_to_draw , meele = True):
 		"""
