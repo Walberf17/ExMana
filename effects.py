@@ -2,17 +2,18 @@
 Create and manage effects in the field.
 """
 import random
-
+from animations import Animations
 from variables_and_definitions import *
+from pygame.sprite import Sprite
 
 
-class Effect(pg.sprite.Sprite):
+class Effect(Sprite , Animations):
 	"""
 	This class sets the effects
 	it inits
 	"""
 
-	def __init__(self , idx_effect: str = "Fire" , pos = None , area = None , duration: int = 1 , action = None , groups: list = None):
+	def __init__(self , idx_effect: str = "Fire" , pos = None , area = None , duration: int = 1 , action = None , groups: list = None , rect_to_be = screen_rect ):
 		"""
 
 		:param idx_effect: str with the name of the image
@@ -23,40 +24,21 @@ class Effect(pg.sprite.Sprite):
 		:param groups: list of groups for the effect to be inserted
 		"""
 		if pos is None:
-			pos = [0 , 0]
+			pos = rect_to_be.topleft
 		if groups is None:
 			groups = []
-		super().__init__(*groups)
+		Sprite.__init__(self , *groups)
 		if area is None:
 			area = [1 , 1]
-		self.area = area
-		self.rect = pg.Rect((0 , 0) , (calc_proportional_size(self.area)))
-		self.rect.center = pos
 		self.name = idx_effect
-		self.original_images = None
-		self.images = None
-		self.sprite_grid = None
-		self.sprite_size = None
-		self.counter = 0
+		Animations.__init__(self , self.name , area , EFFECT_DICT , rect_to_be = rect_to_be)
 		self.duration = duration
-		self.get_info()
-		if action:
-			self.action = action
+		if action is None:
+			action = EFFECT_INFO.get(self.images_idx)
+		self.action = action
 		self.image_index = [0 , 0]
 		self.image_index_differ = random.randint(0 , self.sprite_grid[0])
 
-	def get_info(self , idx = None):
-		if idx is not None:
-			self.name = idx
-		image , self.sprite_size , self.action = EFFECT_DICT.get(self.name)
-		if image:
-			self.original_images = pg.image.load(f'{IMAGES_PATH}Effects/{image}.png').convert_alpha()
-			self.images = self.original_images.copy()
-			self.sprite_grid = self.original_images.get_size()[0] / self.sprite_size[0] , \
-			                   self.original_images.get_size()[1] / self.sprite_size[1]
-		else:
-			self.image = None
-		self.change_size_proportion()
 
 	def change_size_proportion(self):
 		"""
@@ -70,13 +52,7 @@ class Effect(pg.sprite.Sprite):
 			                                 (self.rect.w * self.sprite_grid[0] , self.rect.h * self.sprite_grid[1]))
 
 	def draw(self , screen_to_draw):
-		if self.images:  # draw the image, if any
-			new_surf = pg.Surface((self.rect.size)).convert_alpha()
-			new_surf.fill([0 , 0 , 0 , 0])
-			new_surf.blit(self.images , (0 , 0) , self.create_rect_to_draw())
-			screen_to_draw.blit(new_surf , self.rect)
-		else:
-			pg.draw.rect(screen_to_draw , "green" , self.rect)
+		Animations.draw(self , screen_to_draw)
 
 	def create_rect_to_draw(self):
 		"""
@@ -90,11 +66,7 @@ class Effect(pg.sprite.Sprite):
 		return pg.Rect(init_x , init_y , w , h)
 
 	def update(self):
-		if self.images:
-			self.counter += 1
-			self.image_index[0] = (
-						int((self.counter * 10 / (2 * FPS)) + self.image_index_differ) % (self.sprite_grid[0]))
-
+		Animations.update(self)
 		if self.duration <= 0 or self.duration is None:
 			self.kill()
 

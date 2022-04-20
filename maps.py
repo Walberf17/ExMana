@@ -6,15 +6,17 @@ give the size, save the items for the player to discover.
 
 from variables_and_definitions import *
 from effects import Effect
+from pygame.sprite import Sprite
+from animations import Animations
 
-class Maps(pg.sprite.Sprite):
+class Maps(Sprite , Animations):
 	"""
 	This map is not a grid (v2.0)
 	it draws itself.
 	update the effects and interactions
 	gets the virtual size in meters
 	"""
-	def __init__(self , idx_map , rect , item_dict = None):
+	def __init__(self , idx_map , item_dict = None , rect = screen_rect):
 		"""
 		this class will be a way to interact with the effects, and locate teh player in the screen,
 		also give bounds so that the player is always on screen.
@@ -22,20 +24,15 @@ class Maps(pg.sprite.Sprite):
 		:param rect: pg.Rect to be drawn.
 		:param item_dict: a dictionary of the items in this map.
 		"""
-		super().__init__()
+		Sprite.__init__(self)
 		if item_dict is None:
 			item_dict = {}
-		map_image_path , self.virtual_size , self.name = MAPS_IMAGES_DICT.get(idx_map)
-		if map_image_path:
-			self.image = pg.image.load(f'{IMAGES_PATH}{map_image_path}').convert_alpha()
-		else:
-			self.image = None
-		self.rect = rect
-		if self.image:
-			self.image = pg.transform.scale(self.image , self.rect.size)
+		self.area , self.name = MAPS_INFO.get(idx_map)
+		change_map_proportion(self , rect)
+		Animations.__init__(self , idx_map , self.area , MAPS_IMAGES_DICT , rect_to_be = rect)
 		self.secrets = item_dict
 		self.effects = pg.sprite.Group()
-		change_map_proportion(self)
+		self.rect.topleft = rect.topleft
 		maps_group.add(self)
 
 	def draw(self , screen_to_draw):
@@ -44,8 +41,8 @@ class Maps(pg.sprite.Sprite):
 		:param screen_to_draw: pg.Surface
 		:return:
 		"""
-		if self.image:
-			screen_to_draw.blit(self.image , self.rect)
+		if self.images:
+			screen_to_draw.blit(self.images , self.rect)
 		else:
 			pg.draw.rect(screen_to_draw , "red" , self.rect)
 		self.draw_effects(screen_to_draw)
@@ -117,11 +114,11 @@ class Maps(pg.sprite.Sprite):
 		:param action: if given, a different action will be taken, meaning, only the image from the dict will be used
 		:return: Effect Object
 		"""
-		Effect(idx_effect , pos , area , duration , action , groups = [self.effects , effects_group])
+		Effect(idx_effect , pos , area , duration , action , groups = [self.effects , effects_group] , rect_to_be = self.rect_to_be)
 
 	def effects_update(self):
 		for effect in self.effects:
 			effect.update()
 
 	def get_virtual_size(self):
-		return self.virtual_size
+		return self.area

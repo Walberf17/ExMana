@@ -62,19 +62,35 @@ IMAGES_PATH = './Images/'
 
 # Images for Characters:
 CHARACTER_IMAGES_DICT = {
-	1: ["Characters/Character1.png" , [64 , 64]] ,
+	'path': 'Characters/',
+	1: ["Character1.png" , [64 , 64]] ,
 }
+
+
 
 # Images for Maps
 MAPS_IMAGES_DICT = {
-	1: ["Maps/1.png" , [50 , 50] , "Mapa de Teste"] ,  # image file , size of the map, in meters , name of the map
-	2: ["Maps/1.png" , [5 , 5] , "Mapa de Teste"] ,
-	3: ["Maps/1.png" , [10 , 10] , "Mapa de Teste"] ,
+	'path': 'Maps/',
+	1: ["1.png" , [1536,2048]],  # image file , size of the map, in meters , name of the map
+	2: ["1.png" , [1536,2048]],
+	3: ["1.png" , [1536,2048]],
+}
+
+MAPS_INFO = {
+	1   :   [   [50,50] ,   'Mapa de Teste'],
+	2   :   [   [5,5] ,     'Mapa de Teste'],
+	3   :   [   [10,10] ,   'Mapa de Teste'],
+
 }
 
 # Images for Effects
 EFFECT_DICT = {
-	"Fire": ["1" , [64 , 64] , 'fire_damage(-5)'],
+	'path': 'Effects/',
+	"Fire": ["1.png" , [64 , 64]],
+}
+
+EFFECT_INFO = {
+	'Fire': 'fire_damage(5)'
 }
 
 # for maps
@@ -296,8 +312,10 @@ def unequip_item(place):
 		player.unequip_item(place)
 
 
-def change_map_proportion(map_in_use):
+def change_map_proportion(map_in_use , rect = screen_rect):
 	global map_proportion
 	new_size = map_in_use.get_virtual_size()
-	rect_size = pg.Vector2(screen_rect.size)
+	rect_size = pg.Vector2(rect.size)
 	map_proportion = rect_size.elementwise() / new_size
+
+

@@ -14,21 +14,18 @@ class Character(Sprite , Animations):
 	This class is a base class for other players and monsters
 	"""
 
-	def __init__(self , images_idx = None , groups = None):
+	def __init__(self , images_idx = None , rect_to_be = screen_rect , groups = None):
 		"""
 
 		:param images_idx: image from the dictionary to get
 		:param groups: groups to add
 		"""
-		self.default_height = random.randrange(160 , 210) / 100
-		self.default_width = random.randrange(30 , 60) / 100
-
-		Animations().__init__(images_idx = images_idx , area = [self.default_width , self.default_height] , dict_with_image = CHARACTER_IMAGES_DICT)
 		if groups is None:
 			groups = []
-		elif type(groups) != list:
-			groups = [groups]
-		Sprite().__init__(*groups)
+		Sprite.__init__(self, *groups)
+		self.default_height = random.randrange(160 , 210) / 100
+		self.default_width = random.randrange(30 , 60) / 100
+		Animations.__init__(self , images_idx = images_idx , area = [self.default_width , self.default_height] , dict_with_image = CHARACTER_IMAGES_DICT , rect_to_be = rect_to_be)
 		sight = [5 , 10]
 
 		# default values for this character
@@ -87,7 +84,7 @@ class Character(Sprite , Animations):
 		self.proportion_time_velocity = .2
 		self.effects = []
 		self.calc_status()
-
+		self.change_sizes_proportion()
 
 	### Change things for the game
 
@@ -97,10 +94,9 @@ class Character(Sprite , Animations):
 		Change the rect and the images
 		:return: None
 		"""
-		Animations().change_size_proportion()
+		Animations.change_size_proportion(self)
 		self.sight_pixels = calc_proportional_size(self.sight_meters)
 		self.melee_pixels = calc_proportional_size(self.melee_meters)
-
 
 	def set_deck(self , deck = None , adventure = None):
 		"""
@@ -113,8 +109,6 @@ class Character(Sprite , Animations):
 			self.adventure_deck = deck
 		else:
 			self.battle_deck = deck
-
-
 
 	def create_rect_to_draw_in_status(self , size):
 		"""
@@ -164,9 +158,10 @@ class Character(Sprite , Animations):
 		:param screen_to_draw: pg.Surface
 		:return: None
 		"""
-		Animations().draw(screen_to_draw)
+		Animations.draw(self , screen_to_draw)
 		pg.draw.rect(screen_to_draw , "green" , self.rect , 1)
 		pg.draw.rect(screen_to_draw , "red" , self.time_hud)
+		self.draw_range(screen_to_draw , False)
 
 	def draw_range(self , screen_to_draw , meele = True):
 		"""
@@ -176,18 +171,19 @@ class Character(Sprite , Animations):
 		:return: None
 		"""
 		melee_dist = self.melee_pixels
+		transparency = 90
 		if meele:  # draws a smaller circle, with the range of the meelee attack
 			new_surf = pg.Surface([melee_dist * 2] * 2).convert_alpha()
 			new_surf.fill([0 , 0 , 0 , 0])
 			new_surf_rect = new_surf.get_rect()
-			pg.draw.circle(new_surf , [0 , 0 , 255 , 150] , (new_surf_rect.w / 2 , new_surf_rect.h / 2) , melee_dist)
+			pg.draw.circle(new_surf , [0 , 0 , 255 , transparency] , (new_surf_rect.w / 2 , new_surf_rect.h / 2) , melee_dist)
 		# pg.draw.circle(new_surf , [0,0,0,0] , (new_surf_rect.w/2,new_surf_rect.h/2) , melee_dist /2)
 		else:  # draws a smaller circle, based on the sight_pixels of the character
 			sight_dist = self.sight_pixels
 			new_surf = pg.Surface([sight_dist * 2] * 2).convert_alpha()
 			new_surf.fill([0 , 0 , 0 , 0])
 			new_surf_rect = new_surf.get_rect()
-			pg.draw.circle(new_surf , [0 , 0 , 255 , 150] , (new_surf_rect.w / 2 , new_surf_rect.h / 2) , sight_dist)
+			pg.draw.circle(new_surf , [0 , 0 , 255 , transparency] , (new_surf_rect.w / 2 , new_surf_rect.h / 2) , sight_dist)
 			pg.draw.circle(new_surf , [0 , 0 , 0 , 0] , (new_surf_rect.w / 2 , new_surf_rect.h / 2) , melee_dist)
 
 		new_surf_rect.center = self.rect.center
@@ -210,8 +206,7 @@ class Character(Sprite , Animations):
 		:param **kwargs:
 		:return: None
 		"""
-		# updates the image
-		Animations().update()
+		Animations.update(self , self.velocity)
 
 		# updates the hud of duration
 		if self.time > 0:
@@ -276,7 +271,7 @@ class Character(Sprite , Animations):
 		self.default_resilience += value
 
 	def change_default_height(self , value):
-		proport = 1+(value/self.default_height)
+		proport = 1 + (value / self.default_height)
 		self.default_height *= proport
 		self.area[1] *= proport
 		self.change_sizes_proportion()
@@ -463,6 +458,7 @@ class Character(Sprite , Animations):
 		strength = self.default_strength
 		resilience = self.default_resilience
 		height = self.default_height
+		width = self.default_width
 		sight_meters = self.default_sight_meters
 		mana = self.default_mana
 		hp = self.default_hp
@@ -479,6 +475,8 @@ class Character(Sprite , Animations):
 					match modifier:
 						case "height":
 							height += value
+						case 'width':
+							width += value
 						case "melee_meters":
 							melee_dist += value
 						case "sight":
@@ -501,6 +499,8 @@ class Character(Sprite , Animations):
 		self.strength = strength
 		self.resilience = resilience
 		self.height = height
+		self.width = width
+		# self.area[0] = width
 		self.sight_meters = sight_meters
 		self.sight_pixels = calc_proportional_size(self.sight_meters)
 		self.mana = mana
@@ -509,7 +509,6 @@ class Character(Sprite , Animations):
 		self.default_time = self.time = time + self.proportion_time_velocity * self.velocity
 		self.will = will
 		self.wisdom = wisdow
-		self.width = self.height * self.sprite_size[1] / self.sprite_size[0]
 		self.melee_meters = melee_dist
 		self.melee_pixels = calc_proportional_size(self.melee_meters)
 

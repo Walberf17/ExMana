@@ -9,9 +9,6 @@ from buttons import Button
 
 # create scene
 pg.init()
-if not screen:
-	screen = pg.display.set_mode((400,800))
-	screen_rect = screen.get_rect()
 
 
 # variables
@@ -42,7 +39,7 @@ class Scene:
 		If no click_up is given , it will save the first object clicked
 	and will click up only that object
 	"""
-	def __init__(self , screen_to_draw = screen , dicts_to_do = None , background = "light blue" , fps = 45):
+	def __init__(self , screen_to_draw = None , dicts_to_do = None , background = "light blue" , fps = 45):
 		"""
 		creates a scene object that has its own main loop.
 
@@ -239,6 +236,7 @@ class Scene:
 		calls --> obj.move()		
 		"""
 		# pg.mouse.get_rel()
+		# print(self.to_move)
 		for c_list in self.to_move:
 			for obj in c_list:
 				obj.move()
@@ -308,5 +306,7 @@ class EditScene(EquipScene):
 
 # run
 if __name__=="__main__":
+	screen = pg.display.set_mode((400 , 800))
+	screen_rect = screen.get_rect()
 	main_menu = EquipScene(screen)
 	main_menu.run()
