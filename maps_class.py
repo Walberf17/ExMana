@@ -1,4 +1,4 @@
-from variables_and_definitions import *
+from variables import *
 from grid_class import Grid
 
 

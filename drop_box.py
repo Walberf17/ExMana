@@ -2,7 +2,8 @@
 a class to create some boxes that when released in some other box will act as a button
 """
 
-from variables_and_definitions import *
+from variables import *
+from definitions import *
 
 class SelectionBox:
 	def __init__(self , rect , image , arguments , drops):

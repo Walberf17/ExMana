@@ -5,7 +5,8 @@ there will be 2 decks: adventure and battle
 """
 import random
 import math
-from variables_and_definitions import *
+from variables import *
+from definitions import *
 
 
 

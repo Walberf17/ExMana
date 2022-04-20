@@ -4,8 +4,9 @@ default pygame template
 
 # import things
 import pygame as pg , sys
-from variables_and_definitions import *
+from variables import *
 from buttons import Button
+from definitions import *
 
 # create scene
 pg.init()

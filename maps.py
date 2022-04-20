@@ -4,7 +4,8 @@ give the size, save the items for the player to discover.
 """
 
 
-from variables_and_definitions import *
+from variables import *
+from definitions import *
 from effects import Effect
 from pygame.sprite import Sprite
 from animations import Animations

@@ -1,7 +1,8 @@
 """
 
 """
-from variables_and_definitions import *
+from variables import *
+from definitions import *
 
 
 class TextBox(pg.sprite.Sprite):

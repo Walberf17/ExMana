@@ -3,7 +3,8 @@ Create and manage effects in the field.
 """
 import random
 from animations import Animations
-from variables_and_definitions import *
+from variables import *
+from definitions import *
 from pygame.sprite import Sprite
 
 

@@ -2,7 +2,8 @@
 this class works with the animations
 
 """
-from variables_and_definitions import *
+from variables import *
+from definitions import *
 from pygame.sprite import Sprite
 import random
 

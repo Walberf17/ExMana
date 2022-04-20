@@ -5,7 +5,8 @@ do the click down and up stuffs,
 change color when roovered
 stuff in general
 """
-from variables_and_definitions import *
+from variables import *
+from definitions import *
 
 
 class Button(pg.sprite.Sprite):

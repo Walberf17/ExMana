@@ -20,7 +20,8 @@ Things Done:
 
 
 # import things
-from variables_and_definitions import *
+from variables import *
+from definitions import *
 from textbox import TextBox
 from buttons import Button , SelectionBox , DropBox
 from default_pygame_scene import Scene , EquipScene , EditScene

@@ -5,7 +5,8 @@ This class will create a character and give it default actions.
 """
 import random
 from pygame.sprite import Sprite
-from variables_and_definitions import *
+from variables import *
+from definitions import *
 from animations import Animations
 
 
