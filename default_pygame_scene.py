@@ -170,8 +170,9 @@ class Scene:
 		
 		# loops if objects in self.to_click_up
 		if self.to_click_up:
-			for obj in self.to_click_up:
-				obj.click_up(event)
+			for c_list in self.to_click_up:
+				for obj in c_list:
+					obj.click_up(event)
 				
 		# loops from self.obj_clicked
 		else:

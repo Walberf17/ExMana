@@ -8,7 +8,7 @@ from definitions import *
 from pygame.sprite import Sprite
 from moving_object import MovingObj
 
-class Effect(Sprite , Animations):
+class Effect(Sprite , Animations , MovingObj):
 	"""
 	This class sets the effects
 	it inits
@@ -29,6 +29,7 @@ class Effect(Sprite , Animations):
 		if groups is None:
 			groups = []
 		Sprite.__init__(self , *groups)
+		# MovingObj.__init__(self)
 		if area is None:
 			area = [1 , 1]
 		self.name = idx_effect
