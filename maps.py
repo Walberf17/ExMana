@@ -9,8 +9,9 @@ from definitions import *
 from effects import Effect
 from pygame.sprite import Sprite
 from animations import Animations
+from moving_object import MovingObj
 
-class Maps(Sprite , Animations):
+class Maps(Sprite , Animations , MovingObj):
 	"""
 	This map is not a grid (v2.0)
 	it draws itself.
@@ -26,6 +27,7 @@ class Maps(Sprite , Animations):
 		:param item_dict: a dictionary of the items in this map.
 		"""
 		Sprite.__init__(self)
+		# MovingObj.__init__(self)
 		if item_dict is None:
 			item_dict = {}
 		self.area , self.name = MAPS_INFO.get(idx_map)
@@ -67,6 +69,9 @@ class Maps(Sprite , Animations):
 
 		# sum effects and interactions
 		self.check_interations()
+
+		# upadte_image
+		Animations.update(self)
 
 	def check_interations(self):
 		interactions = []

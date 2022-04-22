@@ -5,7 +5,7 @@ pg.init()
 pg.font.init()
 
 ######## Create main screen
-screen = pg.display.set_mode((800 , 800))
+screen = pg.display.set_mode((800 , 1000))
 screen_rect = screen.get_rect()
 FPS = 45
 map_proportion = pg.Vector2(40 , 40)
@@ -24,7 +24,7 @@ buttons_equip_scene = pg.sprite.Group()
 selection_group = pg.sprite.Group()
 effects_group = pg.sprite.Group()
 moving_objects_group = set()
-
+pointer_group = set()
 
 ######## Variables
 FORCE_TO_CARDS = 2
@@ -58,36 +58,39 @@ buttons_dict = {
 	}
 }
 
+######## Images in General
+
 # for images in general
 IMAGES_PATH = './Images/'
 
 # Images for Characters:
 CHARACTER_IMAGES_DICT = {
-	'path': 'Characters/',
-	1: ["Character1.png" , [64 , 64]] ,
+	'path': 'Characters/' ,
+	1: {'adress': "Character1.png" , 'size': [64 , 64]} ,
+	2: {'adress': "Character2.png" , 'size': [64 , 64] , 'states': ['idle' , 'death' , 'dash']} ,
 }
-
-
 
 # Images for Maps
 MAPS_IMAGES_DICT = {
-	'path': 'Maps/',
-	1: ["1.png" , [1536,2048]],  # image file , size of the map, in meters , name of the map
-	2: ["1.png" , [1536,2048]],
-	3: ["1.png" , [1536,2048]],
-}
-
-MAPS_INFO = {
-	1   :   [   [50,50] ,   'Mapa de Teste'],
-	2   :   [   [5,5] ,     'Mapa de Teste'],
-	3   :   [   [10,10] ,   'Mapa de Teste'],
-
+	'path': 'Maps/' ,
+	1: {'adress': "1.png"} ,
+	2: {'adress': "1.png"} ,
+	3: {'adress': "1.png"} ,
 }
 
 # Images for Effects
 EFFECT_DICT = {
-	'path': 'Effects/',
-	"Fire": ["1.png" , [64 , 64]],
+	'path': 'Effects/' ,
+	"Fire" : {'adress': "1.png" , 'size': [64 , 64]},
+}
+
+### Info of things
+
+MAPS_INFO = {
+	1: [[50 , 50] , 'Mapa de Teste'] ,
+	2: [[5 , 5] , 'Mapa de Teste'] ,
+	3: [[10 , 10] , 'Mapa de Teste'] ,
+
 }
 
 EFFECT_INFO = {
@@ -108,7 +111,6 @@ MAP_EFFECTS = {
 
 }
 
-
 EFFECT_INTERACTIONS = [
 	["Oil" , "Fire" , "Firaga"] ,
 	["Fire" , "Ice" , None] ,
@@ -120,7 +122,7 @@ EFFECT_INTERACTIONS = [
 ######## dicts and lists
 scene_test_dict = {
 	"draw": [maps_group , text_boxes_group , monsters_group , selection_group , players_group ,
-	         cards_group , items_group , buttons_group] ,
+	         cards_group , items_group , buttons_group , pointer_group] ,
 	"click_down": [buttons_group , selection_group , moving_objects_group] ,
 	"update": [buttons_group , maps_group , players_group , selection_group] ,
 	"move": [buttons_group , selection_group , moving_objects_group]
@@ -153,17 +155,17 @@ effects_and_damages = [
 	"space_damage" ,
 	"pure_damage" ,
 	"stress_damage" ,
-	"physical_damage",
-	"feel_smell",
-	"feel_taste",
-	"feel_sight",
-	"search",
-	"throughtful_search",
-	"move_card",
+	"physical_damage" ,
+	"feel_smell" ,
+	"feel_taste" ,
+	"feel_sight" ,
+	"search" ,
+	"throughtful_search" ,
+	"move_card" ,
 
 ]
 
-deck_list_cards_battle = list(x+1 for x in range(11))
+deck_list_cards_battle = list(x + 1 for x in range(11))
 
 CARDS_DICT = {
 	# 1:{
@@ -239,15 +241,13 @@ CARDS_DICT = {
 		'map_effect': [['Poison' , 'poison_damage(5)' , 0 , [2 , 2]]] ,
 		'cost': 1 ,
 		'melee': True ,
-	},
+	} ,
 	11: {
 		'name': 'Demo com Espada' ,
 		'active_effects': [['poison_damage(4)' , 0 , .5] , ['stress_damage(4)' , 0 , .5] ,
-		                  ['physical_damage(2)', 5 , .5]] ,
+		                   ['physical_damage(2)' , 5 , .5]] ,
 		'cost': 1 ,
 		'melee': True ,
-	},
+	} ,
 
 }
-
-
