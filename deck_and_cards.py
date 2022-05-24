@@ -227,6 +227,7 @@ class Card(Sprite , Animations , MovingObj):
 				rect = self.close_up_image_rect
 				self.player.draw_range(screen_to_draw , self.melee)
 		screen_to_draw.blit(image , rect)
+		pg.draw.rect(screen_to_draw , 'red' , rect)
 
 def get_ang(card1 , card2):
 	"""
