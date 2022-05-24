@@ -6,6 +6,9 @@ there will be 2 decks: adventure and battle
 import random
 import math
 from variables import *
+from pygame.sprite import Sprite
+from animations import Animations
+from moving_object import MovingObj
 from definitions import *
 
 
@@ -19,16 +22,18 @@ class Deck:
 	    shuffle the cards in the deck.
 	    move cards from and to deck, drawn or discard cards.
 	"""
-	def __init__(self , card_indexes , deck_rect , hand_rect , map_rect , player):
+	def __init__(self , card_indexes = None , deck_rect=(0*screen_rect.w,.8*screen_rect.h,.1*screen_rect.w,.1*screen_rect.h) , hand_rect = None , map_rect = None , player = None):
 		self.player = player
 		self.deck_group = []
 		self.hand = pg.sprite.Group()
 		self.discard_group = []
 		self.card_indexes = card_indexes
-		self.deck_rect = pg.Rect(calc_proportional_size(deck_rect))
-		self.hand_rect = pg.Rect(calc_proportional_size(hand_rect))
+		self.deck_rect = pg.Rect(deck_rect)
+		self.hand_rect = pg.Rect(hand_rect)
 		self.map_rect = map_rect
 		self.player = player
+		self.clicked =False
+		decks_group.add(self)
 		self.create_deck()
 
 
@@ -36,7 +41,7 @@ class Deck:
 
 	def create_deck(self):
 		for card_idx in self.card_indexes:
-			self.deck_group.append(Card(card_idx , self.player))
+			self.deck_group.append(Card(card_idx , self, self.player))
 
 	def create_hand_deck(self):
 		for card in self.card_indexes:
@@ -95,27 +100,33 @@ class Deck:
 		:param pos: a tuple with the x and y position
 		:return: nothing
 		"""
-		return self.deck_rect.collidepoint(event.pos)
+		self.clicked = self.deck_rect.collidepoint(event.pos)
+		if self.clicked:
+			self.card_deck_to_hand()
+		return self.clicked
 
 	def click_up(self , event):
+		return
+
+	def draw(self , screen_to_draw):
+		pg.draw.rect(screen_to_draw , 'green' , self.deck_rect)
 		for card in self.hand:
-			if card.click_up(event , self.map_rect):
-				self.card_hand_to_discard(card)
+			card.draw(screen_to_draw)
 
 
-class Card(pg.sprite.Sprite):
+class Card(Sprite , Animations , MovingObj):
 	"""
 	this class works with the cards in hand, the cards that will be shown on the screen.
 	"""
-	def __init__(self, idx , player , groups = None):
+	def __init__(self, idx , deck , player , groups = None):
 		if groups is None:
 			groups = []
-		super().__init__(*groups)
+		Sprite.__init__(self , *groups)
+		MovingObj.__init__(self)
+		Animations.__init__(self , images_idx = idx , area = (1,2) , dict_with_image = CARDS_IMAGES , rect_to_be = screen_rect , pos = (random.randint( 1 , screen_rect.w) , screen_rect.h*.95))
 		self.rect = pg.Rect([0 , 0] , CARD_SIZE)
 		this_dict = CARDS_DICT.get(idx)
-		self.original_image = pg.image.load(f'{IMAGES_PATH}Cards/{idx}.png').convert()
-		self.image = pg.transform.scale(self.original_image , [self.rect.w , self.rect.h])
-		self.close_up_image = pg.transform.scale(self.original_image , [self.rect.w * 4 , self.rect.h * 4])
+		self.close_up_image = pg.transform.scale(self.original_images , [self.rect.w * 4 , self.rect.h * 4])
 		self.close_up_image.set_alpha(220)
 		self.close_up_image_rect = self.close_up_image.get_rect()
 		self.idx = idx
@@ -126,29 +137,19 @@ class Card(pg.sprite.Sprite):
 		self.melee = this_dict.get('melee')
 		self.player = player
 		self.acc = [0,0]
-		self.touched = False
+		self.clicked = False
 		self.vel = pg.Vector2(0,0)
+		self.deck = deck
 
 	# handle things in game
-	def click_down(self , event):
-		"""
-		check if the player clicked on itself
-		:param pos: a tuple with the x and y position
-		:return: nothing
-		"""
-		if self.rect.collidepoint(event.pos):
-			# set itself as clicked for moving and append on clicked list
-			self.touched = True
-			return True
-
-	def click_up(self , event , map_rect):
+	def click_up(self , event):
 		"""
 		:param event: pg.Event type
 		:return:
 		"""
-		if self.touched:
-			self.touched = False
-			if map_rect.collidepoint(self.rect.center):
+		if self.clicked:
+			self.clicked = False
+			if self.deck.map_rect.collidepoint(self.rect.center):
 				if self.player.check_in_range(self.rect.center , self.melee):
 					if self.player.check_cost(self.cost):
 						self.do_action()
@@ -162,6 +163,7 @@ class Card(pg.sprite.Sprite):
 			self.do_map_effects()
 
 	def do_active_effects(self):
+		print(self.active_effects)
 		for kind , effect , duration , size in self.active_effects:
 			center = pg.Vector2(self.rect.center)
 			size = calc_proportional_size(size)
@@ -199,30 +201,28 @@ class Card(pg.sprite.Sprite):
 		# set the acc 0 for the new cycle
 		self.acc = (0 , 0)
 
-		# update the close up image if it is touched
-		if self.touched:
+		# update the close up image if it is clicked
+		if self.clicked:
 			self.close_up_image_rect.bottomright = self.rect.bottomright
 
-	def move(self , map_rect):
+	def move(self):
 		"""
 		moves itself in the screen_to_draw.
 		When clicked, moves with the click, but move itself if not clicked to separate itself from
 		:return:
 		"""
-
-		if self.touched:
-			self.rect.move_ip((pg.mouse.get_rel()))
-		else:
+		MovingObj.move(self)
+		if not self.clicked:
 			self.rect.move_ip(self.vel)
-			self.rect.clamp_ip(map_rect)
+			self.rect.clamp_ip(self.deck.hand_rect)
 
-	def draw(self , screen_to_draw , central_map_rect):
+	def draw(self , screen_to_draw):
 		# draw a black rect for showing the sign better
 		pg.draw.rect(screen_to_draw , "black" , self.rect)
-		image = self.image
+		image = self.images
 		rect = self.rect
-		if self.touched:
-			if central_map_rect.collidepoint(self.rect.center):
+		if self.clicked:
+			if self.deck.map_rect.collidepoint(self.rect.center):
 				image = self.close_up_image
 				rect = self.close_up_image_rect
 				self.player.draw_range(screen_to_draw , self.melee)

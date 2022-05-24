@@ -1,3 +1,4 @@
-a  = ['abelha' , 'leão' , 'macaco']
+t = {}
+t['pos'] = 'ab'
 
-print(a.index('macaca'))
+print(t.pos)

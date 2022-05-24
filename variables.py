@@ -25,6 +25,7 @@ selection_group = pg.sprite.Group()
 effects_group = pg.sprite.Group()
 moving_objects_group = set()
 pointer_group = set()
+decks_group = set()
 
 ######## Variables
 FORCE_TO_CARDS = 2
@@ -59,7 +60,7 @@ buttons_dict = {
 }
 
 ######## Images in General
-
+""""""
 # for images in general
 IMAGES_PATH = './Images/'
 
@@ -82,6 +83,13 @@ MAPS_IMAGES_DICT = {
 EFFECT_DICT = {
 	'path': 'Effects/' ,
 	"Fire" : {'adress': "1.png" , 'size': [64 , 64]},
+}
+
+# Images for Cards
+CARDS_IMAGES = {
+	'path': 'Cards/',
+	1 : {'adress': "1.png"},
+	2 : {'adress': "2.png"},
 }
 
 ### Info of things
@@ -122,8 +130,8 @@ EFFECT_INTERACTIONS = [
 ######## dicts and lists
 scene_test_dict = {
 	"draw": [maps_group , text_boxes_group , monsters_group , selection_group , players_group ,
-	         cards_group , items_group , buttons_group , pointer_group] ,
-	"click_down": [buttons_group , selection_group , moving_objects_group] ,
+	         cards_group , items_group , buttons_group , pointer_group , decks_group] ,
+	"click_down": [buttons_group , selection_group , moving_objects_group , decks_group] ,
 	"update": [buttons_group , maps_group , players_group , selection_group] ,
 	"move": [buttons_group , selection_group , moving_objects_group]
 }
@@ -180,13 +188,13 @@ CARDS_DICT = {
 	# size: list if rect , int if circle
 	1: {
 		"name": 'Descanse em Paz' ,
-		'active_effects': [['stress_damage(30)' , 0 , .5]] ,
+		'active_effects': [['Fire' , 'stress_damage(30)' , 0 , .5]] ,
 		'cost': 15 ,
 		'melee': False ,
 	} ,
 	2: {
 		'name': 'Cafungada Monstra' ,
-		'active_effects': [['feel_smell(1)' , 0 , .2]] ,
+		'active_effects': [['Fire' , 'feel_smell(1)' , 0 , .2]] ,
 		'cost': 5 ,
 		'melee': True ,
 	} ,

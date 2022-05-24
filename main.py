@@ -17,8 +17,6 @@ Things Done:
 
 """
 
-
-
 # import things
 from variables import *
 from definitions import *
@@ -30,26 +28,21 @@ from characters import Character
 from maps import Maps
 from pointer import Pointer
 
-map_rect = pg.Rect(0,0,screen_rect.w , screen_rect.w*.8)
-hand_map = pg.Rect(300,300,screen_rect.w , screen_rect.w*.2)
+map_rect = pg.Rect(0 , screen_rect.h * 0.1 , screen_rect.w , screen_rect.h * .6)
+hand_map = pg.Rect(0 , 0 , screen_rect.w , screen_rect.h * .3)
 hand_map.bottom = screen_rect.bottom
-new_rect = pg.Rect(0,0, screen_rect.w*.8 , screen_rect.h*.8)
-new_rect.center = screen_rect.center
-map_rect.center = screen_rect.center
 maps = Maps(2 , rect = map_rect)
-maps.add_effect(idx_effect = 'Fire' , pos = (250,250), duration = 1)
-# maps.add_effect(idx_effect = 'Fire' , pos = (0,0) , area = (3,3) , duration = 2)
-
+maps.add_effect(idx_effect = 'Fire' , pos = (250 , 250) , duration = 1)
+maps.add_effect(idx_effect = 'Fire' , pos = (0 , 0) , area = (3 , 3) , duration = 2)
 p1 = Character(images_idx = 2 , groups = [players_group] , rect_to_be = map_rect)
 # p1.change_state('death')
+deck_test = Deck([1,1,1,2,2,2] , (0*screen_rect.w,.5*screen_rect.h,.1*screen_rect.w,.1*screen_rect.h) , hand_map , map_rect , p1)
+# deck_test.card_deck_to_hand()
+# deck_test.card_deck_to_hand()
+# deck_test.card_deck_to_hand()
+
 # players_group.add(p1)
 # pointer = Pointer(maps)
-maps.rect.center = screen_rect.center
-maps.rect_to_be.center = screen_rect.center
-
-
-
-
 
 
 # create objects

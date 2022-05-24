@@ -25,7 +25,7 @@ class Character(Sprite , Animations , MovingObj):
 		if groups is None:
 			groups = []
 		Sprite.__init__(self, *groups)
-		# MovingObj.__init__(self)
+		MovingObj.__init__(self)
 		self.default_height = random.randrange(160 , 210) / 100
 		self.default_width = random.randrange(30 , 60) / 100
 		Animations.__init__(self , images_idx = images_idx , area = [self.default_width , self.default_height] , dict_with_image = CHARACTER_IMAGES_DICT , rect_to_be = rect_to_be)

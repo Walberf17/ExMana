@@ -15,7 +15,6 @@ class MovingObj:
 		:param event: pg.Event
 		:return: Bool
 		"""
-		pg.mouse.get_rel()
 		if self.rect.collidepoint(event.pos):
 			self.clicked = True
 		return self.clicked

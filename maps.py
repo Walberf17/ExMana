@@ -35,7 +35,8 @@ class Maps(Sprite , Animations , MovingObj):
 		Animations.__init__(self , images_idx = idx_map , area = self.area , dict_with_image = MAPS_IMAGES_DICT , rect_to_be = rect)
 		self.secrets = item_dict
 		self.effects = pg.sprite.Group()
-		self.rect.topleft = rect.topleft
+
+		# self.rect.topleft = rect.topleft
 		maps_group.add(self)
 
 	def draw(self , screen_to_draw):
@@ -44,10 +45,11 @@ class Maps(Sprite , Animations , MovingObj):
 		:param screen_to_draw: pg.Surface
 		:return:
 		"""
-		if self.images:
-			screen_to_draw.blit(self.images , self.rect)
-		else:
-			pg.draw.rect(screen_to_draw , "red" , self.rect)
+		Animations.draw(self  , screen_to_draw)
+		# if self.images:
+		# 	screen_to_draw.blit(self.images , self.rect)
+		# else:
+		# 	pg.draw.rect(screen_to_draw , "red" , self.rect)
 		self.draw_effects(screen_to_draw)
 
 	def draw_effects(self , screen_to_draw):
@@ -57,7 +59,7 @@ class Maps(Sprite , Animations , MovingObj):
 			effect.draw(surf_effects)
 		surf_effects.set_alpha(100)
 		screen_to_draw.blit(surf_effects , self.rect_to_be , self.rect_to_be)
-		# pg.draw.rect(screen_to_draw , 'red' , self.rect_to_be , 6)
+		pg.draw.rect(screen_to_draw , 'red' , self.rect_to_be , 6)
 
 	def update(self):
 		"""

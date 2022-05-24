@@ -150,7 +150,7 @@ class Scene:
 					if not self.to_click_up:
 						self.obj_clicked.add(obj)
 					return
-		
+
 	def click_up_handler(self , event):
 		"""
 		param: pg.MOUSEBUTTONUP event
@@ -179,6 +179,9 @@ class Scene:
 			for obj in self.obj_clicked:
 				obj.click_up(event)
 			self.obj_clicked.clear()
+
+	def finger_down_handler(self , event):
+		aqui
 		
 	def multi_gesture_handler(self , event):
 		"""

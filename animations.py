@@ -54,7 +54,7 @@ class Animations:
 		                    int(self.original_images.get_size()[1] / self.sprite_size[1])]
 		self.image_index = [0 , 0]
 		self.area = area
-		self.rect = pg.Rect(self.rect_to_be.topleft , (calc_proportional_size(self.area)))
+		self.rect = pg.Rect((0,0) , (calc_proportional_size(self.area)))
 		if pos:
 			self.rect.center = pos
 		else:
@@ -63,7 +63,6 @@ class Animations:
 		self.states_counter = []
 		self.change_size_proportion()
 		self.get_sprite_grid_count()
-
 
 	def get_sprite_grid_count(self):
 		for j in range(int(self.sprite_grid[1])):
@@ -93,7 +92,7 @@ class Animations:
 		Change the rect and the images
 		:return: None
 		"""
-		self.rect = pg.Rect(self.rect.center , calc_proportional_size(self.area))
+		self.rect = pg.Rect(self.rect.topleft , calc_proportional_size(self.area))
 		if self.images:
 			self.images = pg.transform.scale(self.original_images , (self.rect.w * self.sprite_grid[0] , self.rect.h * self.sprite_grid[1]))
 
@@ -119,10 +118,12 @@ class Animations:
 			new_surf.fill([0 , 0 , 0 , 0])
 			new_surf.blit(self.images , (0,0) , self.create_rect_to_draw())
 			screen_to_draw.blit(new_surf , self.rect)
+			# pg.draw.rect(screen_to_draw , "red" , self.rect , 10)
+			# pg.draw.rect(screen_to_draw , "green" , self.rect_to_be , 5)
 
 		else:  # draw a rect to debug
 			pg.draw.rect(screen_to_draw , "red" , self.rect)
-
+			pg.draw.rect(screen_to_draw , "green" , self.rect_to_be)
 
 	def update(self , velocity = 6):
 		if self.images:
