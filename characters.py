@@ -28,7 +28,7 @@ class Character(Sprite , Animations , MovingObj):
 		MovingObj.__init__(self)
 		self.default_height = random.randrange(160 , 210) / 100
 		self.default_width = random.randrange(30 , 60) / 100
-		Animations.__init__(self , images_idx = images_idx , area = [self.default_width , self.default_height] , dict_with_image = CHARACTER_IMAGES_DICT , rect_to_be = rect_to_be)
+		Animations.__init__(self , images_idx = images_idx , area = [self.default_width , self.default_height] , dict_with_images = CHARACTER_IMAGES_DICT , rect_to_be = rect_to_be)
 		sight = [5 , 10]
 
 		# default values for this character
@@ -166,6 +166,15 @@ class Character(Sprite , Animations , MovingObj):
 		# pg.draw.rect(screen_to_draw , "black" , new_surf_rect)
 		screen_to_draw.blit(new_surf , new_surf_rect)
 
+	def draw_cost(self , card , screen_to_draw):
+		cost_hud = self.time_hud
+		dtime = card.cost / self.default_time
+		cost_hud.h = screen_rect.h * dtime
+		color = 'blue2'
+		if self.check_cost(cost = card.cost):
+			color = 'yellow'
+		pg.draw.rect(screen_to_draw , color , cost_hud)
+
 	def draw_equip_screen(self , screen_to_draw , screen_to_draw_rect):
 		size = pg.Vector2(screen_to_draw_rect.size).elementwise() * (2 , .5)
 		image = pg.transform.scale(self.images , size)
@@ -183,6 +192,8 @@ class Character(Sprite , Animations , MovingObj):
 		:return: None
 		"""
 		Animations.update(self , self.velocity)
+
+
 
 		# updates the hud of duration
 		if self.time > 0:
@@ -211,6 +222,11 @@ class Character(Sprite , Animations , MovingObj):
 			return all([self.time >= time_cost , self.mana >= mana_cost])
 
 	def consume_cost(self , cost):
+		"""
+		Consume the costs of the item or action
+		:param cost: Union Int, list
+		:return: Nothing
+		"""
 		if type(cost) == int:
 			self.time -= cost
 		else:

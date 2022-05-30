@@ -40,7 +40,7 @@ SCENES = {"Main Menu": None ,
           "Main Adventure": None ,
           "Main Battle": None ,
           "Items Menu": None ,
-          "Habilities Menu": None ,
+          "Abilities Menu": None ,
           "Testes": None}
 
 buttons_dict = {
@@ -90,6 +90,7 @@ CARDS_IMAGES = {
 	'path': 'Cards/',
 	1 : {'adress': "1.png"},
 	2 : {'adress': "2.png"},
+	3 : {'adress' : '3.png'}
 }
 
 ### Info of things
@@ -188,13 +189,13 @@ CARDS_DICT = {
 	# size: list if rect , int if circle
 	1: {
 		"name": 'Descanse em Paz' ,
-		'active_effects': [['Fire' , 'stress_damage(30)' , 0 , .5]] ,
+		'active_effects': [['Fire' , 'stress_damage(30)' , .5]] ,
 		'cost': 15 ,
 		'melee': False ,
 	} ,
 	2: {
 		'name': 'Cafungada Monstra' ,
-		'active_effects': [['Fire' , 'feel_smell(1)' , 0 , .2]] ,
+		'active_effects': [['Fire' , 'feel_smell(1)' , .2]] ,
 		'cost': 5 ,
 		'melee': True ,
 	} ,

@@ -33,7 +33,7 @@ class Effect(Sprite , Animations , MovingObj):
 		if area is None:
 			area = [1 , 1]
 		self.name = idx_effect
-		Animations.__init__(self , images_idx = self.name , area = area , dict_with_image = EFFECT_DICT , rect_to_be = rect_to_be , pos = pos)
+		Animations.__init__(self , images_idx = self.name , area = area , dict_with_images = EFFECT_DICT , rect_to_be = rect_to_be , pos = pos)
 		self.duration = duration
 		if action is None:
 			action = EFFECT_INFO.get(self.images_idx)

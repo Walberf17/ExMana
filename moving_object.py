@@ -19,7 +19,6 @@ class MovingObj:
 			self.clicked = True
 		return self.clicked
 
-
 	def move(self):
 		"""
 		for debug

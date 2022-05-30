@@ -72,6 +72,9 @@ class Scene:
 		self.to_key_down  = dicts_to_do.get("key_down" , [])
 		self.to_key_up  = dicts_to_do.get("key_up" , [])
 		self.to_multi_gesture = dicts_to_do.get("multi_gesture" , [])
+		self.to_finger_down = dicts_to_do.get("finger_down" , [])
+		self.to_finger_up = dicts_to_do.get("finger_up" , [])
+		self.to_finger_motion = dicts_to_do.get("finger_motion" , [])
 		self.background = background
 		
 	def run(self):
@@ -180,8 +183,71 @@ class Scene:
 				obj.click_up(event)
 			self.obj_clicked.clear()
 
+	def finger_motion_handler(self , event):
+		for c_list in self.to_finger_motion:
+			for obj in c_list:
+				if obj.finger_motion(event):
+					self.obj_clicked.add(obj)
+					return
+
 	def finger_down_handler(self , event):
-		aqui
+		"""
+		Default finger down handler.
+
+		Loops the objects in self.to_finger_down.
+
+		It calls the default --> obj.finger_down(event).
+
+		If the obj returns True, it stops the loop.
+
+		If there is no objects in self.to_finger_down,
+		it saves the object in a set with the clicked
+		objects in self.obj_clicked.
+
+		Change if needed
+
+		"""
+		for c_list in self.to_finger_down:
+			for obj in c_list:
+				if obj.finger_down(event):
+					self.obj_clicked.add(obj)
+					return
+
+	def finger_up_handler(self , event):
+		"""
+		param: pg.FINGERUP event
+		Default finger up handler.
+
+		Loops the objects in self.to_finger_up.
+
+		It loops throught the objects in self.obj_clicked,
+		then in self.to_finger_up, then if interacted with
+		anything, it breaks the loop
+
+		It calls the default --> obj.finger_up(event).
+
+
+		Change if needed
+
+		"""
+
+		# loops from self.obj_clicked
+		for obj in self.obj_clicked and self.to_finger_down:
+			if obj.finger_up(event):
+				self.obj_clicked.clear()
+				return
+
+		if self.to_finger_up:
+			# loops if objects in self.to_finger_up
+			for c_list in self.to_finger_up:
+				for obj in c_list:
+					if obj.finger_up(event):
+						return
+		else:
+			for c_list in self.to_finger_down:
+				for obj in c_list:
+					if obj.finger_up(event):
+						return
 		
 	def multi_gesture_handler(self , event):
 		"""

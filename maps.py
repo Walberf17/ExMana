@@ -32,7 +32,7 @@ class Maps(Sprite , Animations , MovingObj):
 			item_dict = {}
 		self.area , self.name = MAPS_INFO.get(idx_map)
 		change_map_proportion(self , rect)
-		Animations.__init__(self , images_idx = idx_map , area = self.area , dict_with_image = MAPS_IMAGES_DICT , rect_to_be = rect)
+		Animations.__init__(self , images_idx = idx_map , area = self.area , dict_with_images = MAPS_IMAGES_DICT , rect_to_be = rect)
 		self.secrets = item_dict
 		self.effects = pg.sprite.Group()
 

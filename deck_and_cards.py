@@ -40,12 +40,11 @@ class Deck:
 	# handle cards in the game
 
 	def create_deck(self):
-		for card_idx in self.card_indexes:
-			self.deck_group.append(Card(card_idx , self, self.player))
+		self.deck_group.extend(self.card_indexes)
 
 	def create_hand_deck(self):
-		for card in self.card_indexes:
-			self.deck_group.append(Card(card , self.player))
+		for card_idx in self.card_indexes:
+			self.deck_group.append(Card(idx = self.deck_group[card_idx], deck = self, player = self.player , groups = [self.hand]))
 
 	def shuffle_main_deck(self):
 		random.shuffle(self.deck_group)
@@ -53,13 +52,14 @@ class Deck:
 	def shuffle_discard_group(self):
 		random.shuffle(self.deck_group)
 
-	def card_deck_to_hand(self , card = 0):
+	def card_deck_to_hand(self , card_idx = 0):
 		"""
 		Takes the first card of the deck and add it to hand group.
 		:return: None
 		"""
-		self.hand.add(self.deck_group[card])
-		self.deck_group.pop(card)
+		# Card(card , self.player)
+		Card(idx = self.deck_group[card_idx], deck = self, player = self.player , groups = [self.hand])
+		self.deck_group.pop(card_idx)
 
 	def card_deck_to_discard(self , card = 0):
 		"""
@@ -74,7 +74,7 @@ class Deck:
 		Takes a given card of the hand and add it to deck group.
 		:return: None
 		"""
-		self.deck_group.insert(0 , card)
+		self.deck_group.insert(0 , card.idx)
 		card.kill()
 
 	def card_hand_to_discard(self , card):
@@ -82,12 +82,12 @@ class Deck:
 		Takes a given card of the hand and add it to discard group.
 		:return: None
 		"""
-		self.discard_group.append(card)
+		self.discard_group.append(card.idx)
 		card.kill()
 
-	def card_discard_to_hand(self , card = -1):
-		self.hand.add(self.discard_group[card])
-		self.discard_group.pop(card)
+	def card_discard_to_hand(self , card_idx = -1):
+		self.hand.add(Card(idx = self.deck_group[card_idx], deck = self, player = self.player , groups = [self.hand]))
+		self.discard_group.pop(card_idx)
 
 	def card_discard_to_deck(self , card = -1):
 		self.deck_group.append(self.discard_group[card])
@@ -113,7 +113,6 @@ class Deck:
 		for card in self.hand:
 			card.draw(screen_to_draw)
 
-
 class Card(Sprite , Animations , MovingObj):
 	"""
 	this class works with the cards in hand, the cards that will be shown on the screen.
@@ -123,11 +122,10 @@ class Card(Sprite , Animations , MovingObj):
 			groups = []
 		Sprite.__init__(self , *groups)
 		MovingObj.__init__(self)
-		Animations.__init__(self , images_idx = idx , area = (1,2) , dict_with_image = CARDS_IMAGES , rect_to_be = screen_rect , pos = (random.randint( 1 , screen_rect.w) , screen_rect.h*.95))
-		self.rect = pg.Rect([0 , 0] , CARD_SIZE)
+		Animations.__init__(self , images_idx = idx , area = (1,2) , dict_with_images = CARDS_IMAGES , rect_to_be = screen_rect , pos = (random.randint( 1 , screen_rect.w) , screen_rect.h*.95))
 		this_dict = CARDS_DICT.get(idx)
-		self.close_up_image = pg.transform.scale(self.original_images , [self.rect.w * 4 , self.rect.h * 4])
-		self.close_up_image.set_alpha(220)
+		self.close_up_image = pg.transform.scale(self.original_images , [self.rect.w * 3 , self.rect.h * 3])
+		self.close_up_image.set_alpha(200)
 		self.close_up_image_rect = self.close_up_image.get_rect()
 		self.idx = idx
 		self.name = this_dict.get('name')
@@ -163,8 +161,7 @@ class Card(Sprite , Animations , MovingObj):
 			self.do_map_effects()
 
 	def do_active_effects(self):
-		print(self.active_effects)
-		for kind , effect , duration , size in self.active_effects:
+		for effect , duration , size in self.active_effects:
 			center = pg.Vector2(self.rect.center)
 			size = calc_proportional_size(size)
 			for character in characters_group:
@@ -175,7 +172,7 @@ class Card(Sprite , Animations , MovingObj):
 		pos = pg.mouse.get_pos()
 		for current_map in maps_group:
 			for kind , action , duration , area in self.map_effect:
-				current_map.add_effects(effect_index = kind , pos = pos , area = area , duration = duration , action = action)
+				current_map.add_effect(pos = pos , area = area , duration = duration , action = action)
 
 	def update(self , hand_cards):
 		"""
@@ -217,17 +214,43 @@ class Card(Sprite , Animations , MovingObj):
 			self.rect.clamp_ip(self.deck.hand_rect)
 
 	def draw(self , screen_to_draw):
-		# draw a black rect for showing the sign better
-		pg.draw.rect(screen_to_draw , "black" , self.rect)
-		image = self.images
-		rect = self.rect
 		if self.clicked:
 			if self.deck.map_rect.collidepoint(self.rect.center):
+				rect = pg.Rect((0,0) , (self.rect.w*.4 , self.rect.h*.4))
+				rect.center = pg.mouse.get_pos()
+				image = pg.transform.scale(self.images , rect.size)
+				screen_to_draw.blit(image , rect)
+				if self.player.check_in_range(rect.center , self.melee):
+					self.draw_range(screen_to_draw , rect)
+			else:
 				image = self.close_up_image
 				rect = self.close_up_image_rect
-				self.player.draw_range(screen_to_draw , self.melee)
-		screen_to_draw.blit(image , rect)
-		pg.draw.rect(screen_to_draw , 'red' , rect)
+				rect.bottomright = self.rect.bottomright
+				screen_to_draw.blit(image , rect)
+			self.player.draw_range(screen_to_draw , self.melee)
+			self.player.draw_cost(self , screen_to_draw)
+		else:
+			Animations.draw(self , screen_to_draw)
+
+	def draw_range(self , screen_to_draw , pos):
+		color = pg.Color('green')
+		dist = calc_proportional_size(self.active_effects[0][2])
+
+		match dist:
+			case float(x):
+				new_surf = pg.Surface([dist * 2] * 2).convert_alpha()
+				new_surf.fill([0 , 0 , 0 , 0])
+				new_surf_rect = new_surf.get_rect()
+				pg.draw.circle(new_surf , color , (new_surf_rect.w / 2 , new_surf_rect.h / 2) , dist)
+				new_surf.set_alpha(160)
+				screen_to_draw.blit(new_surf , (-pg.Vector2(new_surf_rect.size) / 2 + pg.mouse.get_pos()) , new_surf_rect)
+			case [x,y]:
+				new_surf = pg.Surface([x , y]).convert_alpha()
+				new_surf.fill(color)
+				new_surf_rect = new_surf.get_rect()
+				new_surf.set_alpha(160)
+				screen_to_draw.blit(new_surf , (-pg.Vector2(new_surf_rect.size) / 2 + pg.mouse.get_pos()) , new_surf_rect)
+
 
 def get_ang(card1 , card2):
 	"""
