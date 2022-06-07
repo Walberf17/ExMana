@@ -36,7 +36,7 @@ class Maps(Sprite , Animations , MovingObj):
 		self.secrets = item_dict
 		self.effects = pg.sprite.Group()
 
-		# self.rect.topleft = rect.topleft
+		# self.max_rect.topleft = max_rect.topleft
 		maps_group.add(self)
 
 	def draw(self , screen_to_draw):
@@ -47,9 +47,9 @@ class Maps(Sprite , Animations , MovingObj):
 		"""
 		Animations.draw(self  , screen_to_draw)
 		# if self.images:
-		# 	screen_to_draw.blit(self.images , self.rect)
+		# 	screen_to_draw.blit(self.images , self.max_rect)
 		# else:
-		# 	pg.draw.rect(screen_to_draw , "red" , self.rect)
+		# 	pg.draw.max_rect(screen_to_draw , "red" , self.max_rect)
 		self.draw_effects(screen_to_draw)
 
 	def draw_effects(self , screen_to_draw):
@@ -110,9 +110,6 @@ class Maps(Sprite , Animations , MovingObj):
 			effect.set_duration(None)
 		return min(durations) , (int(pos_x/2) , int(pos_y/2))
 
-
-
-
 	def add_effect(self , idx_effect: str = 'Fire' , pos = None , area = None , duration: int = 0, action = None,):
 		"""
 		Creates a effect somewhere in the
@@ -131,3 +128,6 @@ class Maps(Sprite , Animations , MovingObj):
 
 	def get_virtual_size(self):
 		return self.area
+
+	def get_secrets(self):
+		return self.secrets

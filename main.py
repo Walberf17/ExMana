@@ -1,6 +1,7 @@
 """
 
 Doing now:
+	move objects diferently: point the last position and it moves to there
 	cards
 
 Things to do:
@@ -27,6 +28,7 @@ from deck_and_cards import Deck , Card
 from characters import Character
 from maps import Maps
 from pointer import Pointer
+from items_in_game import MapObject as MO
 
 map_rect = pg.Rect(0 , screen_rect.h * 0.1 , screen_rect.w , screen_rect.h * .6)
 hand_map = pg.Rect(0 , 0 , screen_rect.w , screen_rect.h * .3)
@@ -36,7 +38,8 @@ maps.add_effect(idx_effect = 'Fire' , pos = (250 , 250) , duration = 1)
 maps.add_effect(idx_effect = 'Fire' , pos = (0 , 0) , area = (3 , 3) , duration = 2)
 p1 = Character(images_idx = 2 , groups = [players_group] , rect_to_be = map_rect)
 # p1.change_state('death')
-deck_test = Deck([3,3,1,2,2,2] , (0*screen_rect.w,.5*screen_rect.h,.1*screen_rect.w,.1*screen_rect.h) , hand_map , map_rect , p1)
+mo = MO(item_idx = 'bread1' ,groups = [players_group])
+# deck_test = Deck([3,3,1,2,2,2] , (0*screen_rect.w,.5*screen_rect.h,.1*screen_rect.w,.1*screen_rect.h) , hand_map , map_rect , p1)
 # deck_test.card_deck_to_hand()
 # deck_test.card_deck_to_hand()
 # deck_test.card_deck_to_hand()

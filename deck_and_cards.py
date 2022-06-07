@@ -124,9 +124,16 @@ class Card(Sprite , Animations , MovingObj):
 		MovingObj.__init__(self)
 		Animations.__init__(self , images_idx = idx , area = (1,2) , dict_with_images = CARDS_IMAGES , rect_to_be = screen_rect , pos = (random.randint( 1 , screen_rect.w) , screen_rect.h*.95))
 		this_dict = CARDS_DICT.get(idx)
-		self.close_up_image = pg.transform.scale(self.original_images , [self.rect.w * 3 , self.rect.h * 3])
+		if self.images:
+			self.close_up_image = pg.transform.scale(self.original_images , [self.rect.w * 3 , self.rect.h * 3])
+			self.zoom_out_image = pg.transform.scale(self.original_images , (self.rect.w*.4 , self.rect.h*.4))
+		else:
+			self.close_up_image = pg.Surface(self.rect.size)
+			self.zoom_out_image = pg.Surface((self.rect.w * .4 , self.rect.h * .4))
 		self.close_up_image.set_alpha(200)
+		self.zoom_out_image.set_alpha(200)
 		self.close_up_image_rect = self.close_up_image.get_rect()
+		self.zoom_out_image_rect = self.zoom_out_image.get_rect()
 		self.idx = idx
 		self.name = this_dict.get('name')
 		self.active_effects = this_dict.get('active_effects')
@@ -161,18 +168,29 @@ class Card(Sprite , Animations , MovingObj):
 			self.do_map_effects()
 
 	def do_active_effects(self):
-		for effect , duration , size in self.active_effects:
-			center = pg.Vector2(self.rect.center)
-			size = calc_proportional_size(size)
-			for character in characters_group:
-				if center.distance_to(character.rect.center) <= size:
-					character.add_effects(effect , duration)
+		for kind , effect , duration , size in self.active_effects:
+			if kind in ["Smell" , "Taste" , "Sight" , "Search" , "Throughtful Search"]:
+				eval('self.player.effect')
+			else:
+				center = pg.Vector2(self.rect.center)
+				for character in characters_group:
+					match size:
+						case int(x) | float(x):
+							size = calc_proportional_size(size)
+							if center.distance_to(character.rect.center) <= x:
+								character.add_effects(kind , effect , duration)
+						case [x , y]:
+							effect_rect = pg.Rect((0,0) , calc_proportional_size([x,y]))
+							effect_rect.center = center
+							if character.rect.colliderect(effect_rect):
+								character.add_effects(kind , effect , duration)
+
 
 	def do_map_effects(self):
 		pos = pg.mouse.get_pos()
 		for current_map in maps_group:
 			for kind , action , duration , area in self.map_effect:
-				current_map.add_effect(pos = pos , area = area , duration = duration , action = action)
+				current_map.add_effect(idx_effect = kind, pos = pos , area = area , duration = duration , action = action)
 
 	def update(self , hand_cards):
 		"""
@@ -216,12 +234,12 @@ class Card(Sprite , Animations , MovingObj):
 	def draw(self , screen_to_draw):
 		if self.clicked:
 			if self.deck.map_rect.collidepoint(self.rect.center):
-				rect = pg.Rect((0,0) , (self.rect.w*.4 , self.rect.h*.4))
-				rect.center = pg.mouse.get_pos()
-				image = pg.transform.scale(self.images , rect.size)
-				screen_to_draw.blit(image , rect)
-				if self.player.check_in_range(rect.center , self.melee):
-					self.draw_range(screen_to_draw , rect)
+				self.zoom_out_image_rect.center = pg.mouse.get_pos()
+				if self.images:
+					image = pg.transform.scale(self.images , self.zoom_out_image_rect.size)
+					screen_to_draw.blit(image , self.zoom_out_image_rect)
+				if self.player.check_in_range(self.zoom_out_image_rect.center , self.melee):
+					self.draw_range(screen_to_draw)
 			else:
 				image = self.close_up_image
 				rect = self.close_up_image_rect
@@ -232,24 +250,51 @@ class Card(Sprite , Animations , MovingObj):
 		else:
 			Animations.draw(self , screen_to_draw)
 
-	def draw_range(self , screen_to_draw , pos):
-		color = pg.Color('green')
-		dist = calc_proportional_size(self.active_effects[0][2])
+	def draw_range(self , screen_to_draw):
+		if self.active_effects:
+			self.draw_range_active(screen_to_draw)
 
-		match dist:
-			case float(x):
-				new_surf = pg.Surface([dist * 2] * 2).convert_alpha()
-				new_surf.fill([0 , 0 , 0 , 0])
-				new_surf_rect = new_surf.get_rect()
-				pg.draw.circle(new_surf , color , (new_surf_rect.w / 2 , new_surf_rect.h / 2) , dist)
-				new_surf.set_alpha(160)
-				screen_to_draw.blit(new_surf , (-pg.Vector2(new_surf_rect.size) / 2 + pg.mouse.get_pos()) , new_surf_rect)
-			case [x,y]:
-				new_surf = pg.Surface([x , y]).convert_alpha()
-				new_surf.fill(color)
-				new_surf_rect = new_surf.get_rect()
-				new_surf.set_alpha(160)
-				screen_to_draw.blit(new_surf , (-pg.Vector2(new_surf_rect.size) / 2 + pg.mouse.get_pos()) , new_surf_rect)
+		if self.map_effect:
+			self.draw_range_map(screen_to_draw)
+
+	def draw_range_map(self , screen_to_draw):
+		for effect in self.map_effect:
+			color = pg.Color('green')
+			dist = calc_proportional_size(effect[3])
+			match dist:
+				case float(x):
+					new_surf = pg.Surface([x * 2] * 2).convert_alpha()
+					new_surf.fill([0 , 0 , 0 , 0])
+					new_surf_rect = new_surf.get_rect()
+					pg.draw.circle(new_surf , color , (new_surf_rect.w / 2 , new_surf_rect.h / 2) , dist)
+					new_surf.set_alpha(160)
+					screen_to_draw.blit(new_surf , (-pg.Vector2(new_surf_rect.size) / 2 + self.zoom_out_image_rect.center) , new_surf_rect)
+				case [x,y]:
+					new_surf = pg.Surface([x , y]).convert_alpha()
+					new_surf.fill(color)
+					new_surf_rect = new_surf.get_rect()
+					new_surf.set_alpha(160)
+					screen_to_draw.blit(new_surf , (-pg.Vector2(new_surf_rect.size) / 2 + self.zoom_out_image_rect.center) , new_surf_rect)
+
+	def draw_range_active(self , screen_to_draw):
+		for effect in self.active_effects:
+			color = pg.Color('blue')
+			dist = calc_proportional_size(effect[3])
+			alpha = 160
+			match dist:
+				case float(x):
+					new_surf = pg.Surface([x * 2] * 2).convert_alpha()
+					new_surf.fill([0 , 0 , 0 , 0])
+					new_surf_rect = new_surf.get_rect()
+					pg.draw.circle(new_surf , color , (new_surf_rect.w / 2 , new_surf_rect.h / 2) , dist)
+					new_surf.set_alpha(alpha)
+					screen_to_draw.blit(new_surf , (-pg.Vector2(new_surf_rect.size) / 2 + self.zoom_out_image_rect.center) , new_surf_rect)
+				case [x,y]:
+					new_surf = pg.Surface([x , y]).convert_alpha()
+					new_surf.fill(color)
+					new_surf_rect = new_surf.get_rect()
+					new_surf.set_alpha(alpha)
+					screen_to_draw.blit(new_surf , (-pg.Vector2(new_surf_rect.size) / 2 + self.zoom_out_image_rect.center) , new_surf_rect)
 
 
 def get_ang(card1 , card2):

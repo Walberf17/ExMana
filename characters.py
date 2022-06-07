@@ -42,7 +42,7 @@ class Character(Sprite , Animations , MovingObj):
 		self.default_mana = 10
 		self.default_hp = 10
 		self.default_velocity = 5
-		self.default_time = 20
+		self.default_time = 10000
 		self.default_will = 5  # default magical attack and how strong controls mana
 		self.default_wisdom = 5  # default magical resilience
 		self.default_melee_dist = self.default_height
@@ -93,8 +93,8 @@ class Character(Sprite , Animations , MovingObj):
 
 	def change_sizes_proportion(self):
 		"""
-		Change the rect and stuff proportionally to the current map.
-		Change the rect and the images
+		Change the max_rect and stuff proportionally to the current map.
+		Change the max_rect and the images
 		:return: None
 		"""
 		Animations.change_size_proportion(self)
@@ -115,7 +115,7 @@ class Character(Sprite , Animations , MovingObj):
 
 	def create_rect_to_draw_in_status(self , size):
 		"""
-		creates a rect to draw the correct sprite
+		creates a max_rect to draw the correct sprite
 		:return: None
 		"""
 		i , j = self.image_index
@@ -163,7 +163,7 @@ class Character(Sprite , Animations , MovingObj):
 			pg.draw.circle(new_surf , [0 , 0 , 0 , 0] , (new_surf_rect.w / 2 , new_surf_rect.h / 2) , melee_dist)
 
 		new_surf_rect.center = self.rect.center
-		# pg.draw.rect(screen_to_draw , "black" , new_surf_rect)
+		# pg.draw.max_rect(screen_to_draw , "black" , new_surf_rect)
 		screen_to_draw.blit(new_surf , new_surf_rect)
 
 	def draw_cost(self , card , screen_to_draw):
@@ -564,24 +564,22 @@ class Character(Sprite , Animations , MovingObj):
 
 	# Effects
 
-	def add_effects(self , effect , duration):
+	def add_effects(self , kind , effect , duration):
 		if duration == 0:
 			eval(f'self.{effect}')
 		else:
-			self.effects.add([effect , duration])
+			self.effects.add([kind , effect , duration])
 
 	def do_effects(self):
 		to_remove = []
-		for idx , effect_list in self.effects:
-			effect , duration = effect_list
+		for idx , kind , effect , duration in enumerate(self.effects):
 			duration -= 1
 			eval(f'self.{effect}')
-			self.effects[idx] = [effect , duration]
+			self.effects[idx][-1] = duration
 			if duration == 0:
 				to_remove.append(idx)
 		for idx in to_remove:
 			self.effects.pop(idx)
-		to_remove.clear()
 
 	def fire_damage(self , value: int = -2):
 		"""
@@ -755,9 +753,16 @@ class Character(Sprite , Animations , MovingObj):
 		self.velocity -= int(value / 2)
 		self.change_hp(value)
 
+	def feel_smell(self , area):
+		for current_map in maps_group:
+			for obj in current_map.get_secrets():
+				return
+				if obj.check_discover('Smell'):
+					obj.discover()
+
 	def calc_new_size(self):
 		"""
-		Calculate the new size of the rect, to look proportional to the map
+		Calculate the new size of the max_rect, to look proportional to the map
 		:return:
 		"""
 		self.rect = pg.Rect((0 , 0) , calc_proportional_size((self.width , self.height)))

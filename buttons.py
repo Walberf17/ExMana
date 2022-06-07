@@ -12,7 +12,7 @@ from definitions import *
 class Button(pg.sprite.Sprite):
 	def __init__(self , relative_size , image: str = None , txt = None , on_click_down = None , on_click_up = None , colors = None , groups = None):
 		"""
-		It creates a rect in the screen, and does a action when interacted. If calls update, when hoovered it slightly change the color.
+		It creates a max_rect in the screen, and does a action when interacted. If calls update, when hoovered it slightly change the color.
 		:param relative_size: a list or tuple with float numbers from 0 to 1.0
 		:param action: str with the action to do.
 		:param image: str with path to the image
@@ -56,7 +56,7 @@ class Button(pg.sprite.Sprite):
 		
 	def finger_up(self , event):
 		"""
-		Set itself as not clicked, and it set to do a action, do the action if the mouse it in the rect
+		Set itself as not clicked, and it set to do a action, do the action if the mouse it in the max_rect
 		:param event: pg.MOUSEBUTTONUP event
 		:return:
 		"""
@@ -169,7 +169,7 @@ class Button(pg.sprite.Sprite):
 
 	def click_up(self , event):
 		"""
-		Set itself as not clicked, and it set to do a action, do the action if the mouse it in the rect
+		Set itself as not clicked, and it set to do a action, do the action if the mouse it in the max_rect
 		:param event: pg.MOUSEBUTTONUP event
 		:return:
 		"""
@@ -182,7 +182,7 @@ class Button(pg.sprite.Sprite):
 	
 	def click_up_edit(self , event):
 		"""
-		Set itself as not clicked, and it set to do a action, do the action if the mouse it in the rect
+		Set itself as not clicked, and it set to do a action, do the action if the mouse it in the max_rect
 		:param event: pg.MOUSEBUTTONUP event
 		:return:
 		"""
@@ -218,7 +218,7 @@ class Button(pg.sprite.Sprite):
 			self.color = 0
 
 		# if self.clicked:
-		# 	self.rect.move_ip(pg.mouse.get_rel())
+		# 	self.max_rect.move_ip(pg.mouse.get_rel())
 
 class SelectionBox(pg.sprite.Sprite):
 	def __init__(self , rect , image: str = None , arguments: str = None , drops = None , groups = None):
@@ -273,7 +273,7 @@ class DropBox(Button):
 
 	def __init__(self , relative_size, drop_action: str = None , arguments: str = None , action: str = None , image: str = None , txt = None , action_on_click = False , colors = ['orange' , 'orange4' , 'orange2']):
 		"""
-		It creates a rect in the screen, and does a action when interacted. If calls update, when hoovered it slightly change the color.
+		It creates a max_rect in the screen, and does a action when interacted. If calls update, when hoovered it slightly change the color.
 		:param relative_size: a list or tuple with float numbers from 0 to 1.0
 		:param action: str with the action to do.
 		:param image: str with path to the image

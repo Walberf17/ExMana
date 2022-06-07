@@ -18,7 +18,7 @@ class Effect(Sprite , Animations , MovingObj):
 		"""
 
 		:param idx_effect: str with the name of the image
-		:param pos: center of the effect's rect
+		:param pos: center of the effect's max_rect
 		:param area: area, in meters of the effect
 		:param duration: int with the duration of the effect
 		:param action: str: the actual effect of this effect
@@ -47,7 +47,7 @@ class Effect(Sprite , Animations , MovingObj):
 
 	def create_rect_to_draw(self):
 		"""
-		creates a rect to draw the correct sprite
+		creates a max_rect to draw the correct sprite
 		:return: None
 		"""
 		i , j = self.image_index

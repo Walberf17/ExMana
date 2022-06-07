@@ -1,32 +1,8 @@
 from variables import *
 
+
 def set_scene(name , obj):
 	SCENES[name] = obj
-
-
-def calc_relative_size(size , rect = screen_rect):
-	"""
-	converts a size, position or rect_info to the size of the screen
-	:param size: Union of int | [x,y] | [x,y,w,h]
-	:param rect: The rect with the proportion
-	:return: List
-	"""
-	# size = list(size)
-	match size:
-		case int(x) | float(x):
-			return x * rect.w
-		case [x , y]:
-			a = x * rect.w
-			b = y * rect.h
-			return [a , b]
-		case [x , y , w , h]:
-			a = x * rect.w
-			b = y * rect.h
-			c = w * rect.w
-			d = h * rect.h
-			return [a , b , c , d]
-		case _:
-			raise TypeError
 
 
 def calc_proportional_size(old_size):
@@ -48,6 +24,8 @@ def calc_proportional_size(old_size):
 			c = map_proportion.x * w
 			d = map_proportion.y * h
 			return [a , b , c , d]
+
+
 
 
 def equip_item(item , place):

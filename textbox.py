@@ -10,7 +10,7 @@ class TextBox(pg.sprite.Sprite):
 	cutinh then is smaller ones , and drawing 
 	each on screen.
 	param txt : string
-	param rect : pg.Rect
+	param max_rect : pg.Rect
 	param font : pg.font.SysFont
 	param font_color : pg.color
 	param bg_color : pg.color
