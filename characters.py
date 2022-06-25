@@ -9,6 +9,7 @@ from variables import *
 from definitions import *
 from animations import Animations
 from moving_object import MovingObj
+import math
 
 
 class Character(Sprite , Animations , MovingObj):
@@ -61,7 +62,6 @@ class Character(Sprite , Animations , MovingObj):
 		self.wisdom = self.default_wisdom
 		self.melee_meters = self.default_melee_dist
 		self.melee_pixels = calc_proportional_size(self.melee_meters)
-
 		self.rect = pg.Rect((0 , 0) , (calc_proportional_size([self.default_height , self.default_width])))
 		self.clicked = False
 		self.status = {}  # status to calc in game
@@ -81,11 +81,11 @@ class Character(Sprite , Animations , MovingObj):
 		self.other_hand = "l_hand"
 		self.level = 1
 		self.side_deck = None
-		self.battle_deck = None
-		self.adventure_deck = None
+		self.main_deck = None
 		self.time_hud = pg.Rect(0 , 0 , screen_rect.w * .034 , screen_rect.h)
 		self.proportion_time_velocity = .2
 		self.effects = []
+		self.abnormal_effects = {}
 		self.calc_status()
 		self.change_sizes_proportion()
 
@@ -111,7 +111,10 @@ class Character(Sprite , Animations , MovingObj):
 		if adventure:
 			self.adventure_deck = deck
 		else:
-			self.battle_deck = deck
+			self.main_deck = deck
+
+	def get_deck(self):
+		return self.main_deck
 
 	def create_rect_to_draw_in_status(self , size):
 		"""
@@ -153,8 +156,8 @@ class Character(Sprite , Animations , MovingObj):
 			new_surf.fill([0 , 0 , 0 , 0])
 			new_surf_rect = new_surf.get_rect()
 			pg.draw.circle(new_surf , [0 , 0 , 255 , transparency] , (new_surf_rect.w / 2 , new_surf_rect.h / 2) , melee_dist)
-		# pg.draw.circle(new_surf , [0,0,0,0] , (new_surf_rect.w/2,new_surf_rect.h/2) , melee_dist /2)
-		else:  # draws a smaller circle, based on the sight_pixels of the character
+
+		else:  # draws a larger circle, based on the sight_pixels of the character
 			sight_dist = self.sight_pixels
 			new_surf = pg.Surface([sight_dist * 2] * 2).convert_alpha()
 			new_surf.fill([0 , 0 , 0 , 0])
@@ -192,8 +195,7 @@ class Character(Sprite , Animations , MovingObj):
 		:return: None
 		"""
 		Animations.update(self , self.velocity)
-
-
+		MovingObj.update(self)
 
 		# updates the hud of duration
 		if self.time > 0:
@@ -206,9 +208,9 @@ class Character(Sprite , Animations , MovingObj):
 		if self.hp <= (0 - self.will // 10):
 			self.kill()
 
-	def check_in_range(self , pos , melee):
+	def check_in_range(self , melee):
 		center = pg.Vector2(self.rect.center)
-		dist = center.distance_to(pos)
+		dist = center.distance_to(pg.mouse.get_pos())
 		if melee:
 			return dist <= self.melee_pixels
 		else:
@@ -240,6 +242,15 @@ class Character(Sprite , Animations , MovingObj):
 		new_surf.blit(self.images , (0 , 0) , self.create_rect_to_draw())
 		mask = pg.mask.from_surface(new_surf)
 		return mask
+
+	def get_multiplier(self , card):
+		if type(card) not in [list , tuple]:
+			card = [card , 0]
+		multiplier = 1
+		if card[0] in self.abnormal_effects:
+			multiplier += self.abnormal_effects.get(card[0] , 0)
+		multiplier += self.will//25
+		return multiplier
 
 	def kill(self):
 		super().kill()
@@ -421,7 +432,7 @@ class Character(Sprite , Animations , MovingObj):
 		:return: None
 		"""
 		self.hp += value
-		self.hp = min(self.hp , self.default_hp)
+		self.hp = min([self.hp , self.default_hp])
 
 	def change_mana(self , value: int = -2):
 		"""
@@ -430,11 +441,41 @@ class Character(Sprite , Animations , MovingObj):
 		:return: None
 		"""
 		self.mana += value
+		self.mana = min([self.mana , self.default_mana])
 
 	# actions
 
-	def move_card(self , value):
-		pass
+	def get_item(self , size):
+		"""
+		get the card and add it to the deck
+		:param size: area in meters to search
+		:return:
+		"""
+		center = pg.Vector2(pg.mouse.get_pos())
+		for obj in items_group:
+			match size:
+				case int(x) | float(x):
+					if center.distance_to(obj.rect.center) <= x:
+						obj.get_me(self.main_deck)
+				case [x , y]:
+					effect_rect = pg.Rect((0 , 0) , [x , y])
+					effect_rect.center = center
+					if obj.rect.colliderect(effect_rect):
+						obj.get_me(self.main_deck)
+
+	def move_card(self , meters):
+		"""
+		not ready yet, it will move the players up to that many meters
+		:param meters: size in meters
+		:return: None
+		"""
+		pos = pg.Vector2(pg.mouse.get_pos())
+		dist = pos.distance_to(self.rect.center)
+		max_d = self.melee_pixels
+		ang = get_ang(self.rect.center , pos)
+		meters = calc_proportional_size(meters/1000)
+		vel = [math.cos(ang)*(meters*(dist/max_d)) , math.sin(ang)*(meters)]
+		self.acceleration = pg.Vector2(calc_proportional_size(vel))*self.get_multiplier("Move")
 
 	def physical_attack(self , power):
 		pass
@@ -708,9 +749,9 @@ class Character(Sprite , Animations , MovingObj):
 		:return: None
 		"""
 		if value > 0:
-			value = max(0 , value - self.wisdom)
+			value = max([0 , value - self.wisdom])
 		else:
-			value = min(0 , value - self.wisdom)
+			value = min([0 , value - self.wisdom])
 		self.change_hp(value)
 
 	def pure_damage(self , value: int = -2):
@@ -728,9 +769,9 @@ class Character(Sprite , Animations , MovingObj):
 		:return:
 		"""
 		if value > 0:
-			value = max(0 , value - self.wisdom - random.randint(self.will))
+			value = max([0 , value - self.wisdom - random.randint(self.will)])
 		else:
-			value = min(0 , value - self.wisdom - random.randint(self.will))
+			value = min([0 , value - self.wisdom - random.randint(self.will)])
 		self.change_hp(value)
 
 	def physical_damage(self , value: int = -2):
@@ -740,25 +781,45 @@ class Character(Sprite , Animations , MovingObj):
 		:return:
 		"""
 		if value > 0:
-			value = max(0 , value - self.resilience)
+			value = max([0 , value - self.resilience])
 		else:
-			value = min(0 , value - self.resilience)
+			value = min([0 , value - self.resilience])
 		self.change_hp(value)
 
 	def oil_damage(self , value: int = -2):
 		if value > 0:
-			value = max(0 , value - self.resilience)
+			value = max([0 , value - self.resilience])
 		else:
-			value = min(0 , value - self.resilience)
+			value = min([0 , value - self.resilience])
 		self.velocity -= int(value / 2)
 		self.change_hp(value)
 
-	def feel_smell(self , area):
+	# Feels the world
+
+	def feel_world(self , size , kind):
+		"""
+		this will discover the world around the player
+		:param size: the area, in meters, of the effect
+		:param kind: the type sensation the player will use to discover the things
+		:return: None
+		"""
+		pos = pg.mouse.get_pos()
 		for current_map in maps_group:
 			for obj in current_map.get_secrets():
-				return
-				if obj.check_discover('Smell'):
-					obj.discover()
+				match size:
+					case int(x) | float(x):
+						pos = pg.Vector2(pos)
+						if pos.distance_to(obj.rect.center) <= x:
+							if obj.check_discover(kind):
+								obj.discover()
+					case [x , y]:
+						effect_rect = pg.Rect((0 , 0) , size)
+						effect_rect.center = pos
+						if obj.rect.colliderect(effect_rect):
+							if obj.check_discover(kind):
+								obj.discover()
+
+	# Administration of the character
 
 	def calc_new_size(self):
 		"""
@@ -811,3 +872,14 @@ class Character(Sprite , Animations , MovingObj):
 		self.other_hand = new_dict.get('other_hand')
 		self.calc_status()
 		self.change_sizes_proportion()
+
+def get_ang(p1 , p2):
+	"""
+	calcs the angle from 2 diferent cards
+	:param card1: Card object
+	:param card2: Card object
+	:return: angle in radians
+	"""
+	x1 , y1 = p1
+	x2 , y2 = p2
+	return math.atan2((y2 - y1) , (x2 - x1))

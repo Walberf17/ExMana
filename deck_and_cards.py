@@ -39,12 +39,22 @@ class Deck:
 
 	# handle cards in the game
 
-	def create_deck(self):
-		self.deck_group.extend(self.card_indexes)
+	def create_deck(self , card_list = None):
+		if card_list is None:
+			card_list = self.card_indexes
+		self.deck_group.extend(card_list)
 
-	def create_hand_deck(self):
-		for card_idx in self.card_indexes:
-			self.deck_group.append(Card(idx = self.deck_group[card_idx], deck = self, player = self.player , groups = [self.hand]))
+	def new_card(self , card_list):
+		"""
+		adds a new card to the deck in the current play
+		:param card_list: Union of float, int,str or list
+		:return: None
+		"""
+		if type(card_list) in [float , int , str]:
+			card_list = [card_list]
+		self.create_deck(card_list = card_list)
+		self.shuffle_main_deck()
+		add_cards_to_deck(cards_list = card_list)
 
 	def shuffle_main_deck(self):
 		random.shuffle(self.deck_group)
@@ -102,7 +112,10 @@ class Deck:
 		"""
 		self.clicked = self.deck_rect.collidepoint(event.pos)
 		if self.clicked:
-			self.card_deck_to_hand()
+			if self.deck_group:
+				self.card_deck_to_hand()
+			else:
+				print('no more cards')
 		return self.clicked
 
 	def click_up(self , event):
@@ -122,7 +135,7 @@ class Card(Sprite , Animations , MovingObj):
 			groups = []
 		Sprite.__init__(self , *groups)
 		MovingObj.__init__(self)
-		Animations.__init__(self , images_idx = idx , area = (1,2) , dict_with_images = CARDS_IMAGES , rect_to_be = screen_rect , pos = (random.randint( 1 , screen_rect.w) , screen_rect.h*.95))
+		Animations.__init__(self , images_idx = idx , area = (1,1.4) , dict_with_images = CARDS_IMAGES , rect_to_be = screen_rect , pos = (random.randint( 1 , screen_rect.w) , screen_rect.h*.95))
 		this_dict = CARDS_DICT.get(idx)
 		if self.images:
 			self.close_up_image = pg.transform.scale(self.original_images , [self.rect.w * 3 , self.rect.h * 3])
@@ -147,6 +160,16 @@ class Card(Sprite , Animations , MovingObj):
 		self.deck = deck
 
 	# handle things in game
+	def change_size_proportion(self):
+		"""
+		Change the max_rect and stuff proportionally to the current map.
+		Change the max_rect and the images
+		:return: None
+		"""
+		self.rect = pg.Rect(self.rect.topleft , calc_proportional_size(self.area , max_area = [7,7], max_rect = self.rect_to_be ))
+		if self.images:
+			self.images = pg.transform.scale(self.original_images , (self.rect.w * self.sprite_grid[0] , self.rect.h * self.sprite_grid[1]))
+
 	def click_up(self , event):
 		"""
 		:param event: pg.Event type
@@ -155,9 +178,10 @@ class Card(Sprite , Animations , MovingObj):
 		if self.clicked:
 			self.clicked = False
 			if self.deck.map_rect.collidepoint(self.rect.center):
-				if self.player.check_in_range(self.rect.center , self.melee):
+				if self.player.check_in_range(self.melee):
 					if self.player.check_cost(self.cost):
 						self.do_action()
+						self.kill()
 			return True
 
 	def do_action(self):
@@ -169,14 +193,19 @@ class Card(Sprite , Animations , MovingObj):
 
 	def do_active_effects(self):
 		for kind , effect , duration , size in self.active_effects:
-			if kind in ["Smell" , "Taste" , "Sight" , "Search" , "Throughtful Search"]:
-				eval('self.player.effect')
+			multiplier = self.player.get_multiplier(effect)
+			size = calc_proportional_size(size)
+			if type(size) == list:
+				size = [size[0]*multiplier , size[1] * multiplier]
+			else:
+				size *= multiplier
+			if kind in ["Smell" , "Taste" , "Sight" , "Search" , "Throughtful Search" , 'Get' , 'Move']:
+				eval(f'self.player.{effect}')
 			else:
 				center = pg.Vector2(self.rect.center)
 				for character in characters_group:
 					match size:
 						case int(x) | float(x):
-							size = calc_proportional_size(size)
 							if center.distance_to(character.rect.center) <= x:
 								character.add_effects(kind , effect , duration)
 						case [x , y]:
@@ -185,14 +214,18 @@ class Card(Sprite , Animations , MovingObj):
 							if character.rect.colliderect(effect_rect):
 								character.add_effects(kind , effect , duration)
 
-
 	def do_map_effects(self):
 		pos = pg.mouse.get_pos()
 		for current_map in maps_group:
 			for kind , action , duration , area in self.map_effect:
+				multiplier = self.player.get_multiplier(kind)
+				if type(area) == list:
+					area = [area[0] * multiplier , area[1] * multiplier]
+				else:
+					area *= multiplier
 				current_map.add_effect(idx_effect = kind, pos = pos , area = area , duration = duration , action = action)
 
-	def update(self , hand_cards):
+	def update(self):
 		"""
 		calcs the forces to move itself.
 		Calcs the position for the close up image
@@ -200,6 +233,8 @@ class Card(Sprite , Animations , MovingObj):
 		"""
 
 		# calc the force and angule for each card it is touching
+		hand_cards = self.deck.hand
+
 		for card in hand_cards:
 			if card != self:  # not checking with itself
 				if self.rect.colliderect(card):  # if card collide
@@ -232,13 +267,19 @@ class Card(Sprite , Animations , MovingObj):
 			self.rect.clamp_ip(self.deck.hand_rect)
 
 	def draw(self , screen_to_draw):
+		"""
+		draw itself on the surface.
+		If not clicked, draw from Animations,
+		if clicked and not in the map, zoom, else, draw the ranges of its use.
+		:param screen_to_draw:
+		:return:
+		"""
 		if self.clicked:
 			if self.deck.map_rect.collidepoint(self.rect.center):
 				self.zoom_out_image_rect.center = pg.mouse.get_pos()
 				if self.images:
-					image = pg.transform.scale(self.images , self.zoom_out_image_rect.size)
-					screen_to_draw.blit(image , self.zoom_out_image_rect)
-				if self.player.check_in_range(self.zoom_out_image_rect.center , self.melee):
+					screen_to_draw.blit(self.zoom_out_image , self.zoom_out_image_rect)
+				if self.player.check_in_range(self.melee) or self.images is None:
 					self.draw_range(screen_to_draw)
 			else:
 				image = self.close_up_image
@@ -251,6 +292,11 @@ class Card(Sprite , Animations , MovingObj):
 			Animations.draw(self , screen_to_draw)
 
 	def draw_range(self , screen_to_draw):
+		"""
+		Draw a rect_to_be in the ranges of the effects on the screen
+		:param screen_to_draw:
+		:return:
+		"""
 		if self.active_effects:
 			self.draw_range_active(screen_to_draw)
 
@@ -258,44 +304,56 @@ class Card(Sprite , Animations , MovingObj):
 			self.draw_range_map(screen_to_draw)
 
 	def draw_range_map(self , screen_to_draw):
+		"""
+		draw the range of the effects that will be added to the map.
+		:param screen_to_draw: pg.Surface
+		:return:
+		"""
 		for effect in self.map_effect:
 			color = pg.Color('green')
 			dist = calc_proportional_size(effect[3])
-			match dist:
-				case float(x):
-					new_surf = pg.Surface([x * 2] * 2).convert_alpha()
-					new_surf.fill([0 , 0 , 0 , 0])
-					new_surf_rect = new_surf.get_rect()
-					pg.draw.circle(new_surf , color , (new_surf_rect.w / 2 , new_surf_rect.h / 2) , dist)
-					new_surf.set_alpha(160)
-					screen_to_draw.blit(new_surf , (-pg.Vector2(new_surf_rect.size) / 2 + self.zoom_out_image_rect.center) , new_surf_rect)
-				case [x,y]:
-					new_surf = pg.Surface([x , y]).convert_alpha()
-					new_surf.fill(color)
-					new_surf_rect = new_surf.get_rect()
-					new_surf.set_alpha(160)
-					screen_to_draw.blit(new_surf , (-pg.Vector2(new_surf_rect.size) / 2 + self.zoom_out_image_rect.center) , new_surf_rect)
+			multiplier = self.player.get_multiplier(effect)
+			if type(dist) in [float , int]:
+				new_surf = pg.Surface([x * 2 * multiplier] * 2).convert_alpha()
+				new_surf.fill([0 , 0 , 0 , 0])
+				new_surf_rect = new_surf.get_rect()
+				pg.draw.circle(new_surf , color , (new_surf_rect.w / 2 , new_surf_rect.h / 2) , dist)
+				new_surf.set_alpha(160)
+				screen_to_draw.blit(new_surf , (-pg.Vector2(new_surf_rect.size) / 2 + self.zoom_out_image_rect.center) , new_surf_rect)
+			elif len(dist) == 2:
+				x , y = dist
+				new_surf = pg.Surface([x * multiplier , y * multiplier]).convert_alpha()
+				new_surf.fill(color)
+				new_surf_rect = new_surf.get_rect()
+				new_surf.set_alpha(160)
+				screen_to_draw.blit(new_surf , (-pg.Vector2(new_surf_rect.size) / 2 + self.zoom_out_image_rect.center) , new_surf_rect)
 
 	def draw_range_active(self , screen_to_draw):
+		"""
+		draw the range of the active effects of the card
+		:param screen_to_draw: pg.Surface
+		:return: None
+		"""
+
 		for effect in self.active_effects:
 			color = pg.Color('blue')
 			dist = calc_proportional_size(effect[3])
 			alpha = 160
-			match dist:
-				case float(x):
-					new_surf = pg.Surface([x * 2] * 2).convert_alpha()
-					new_surf.fill([0 , 0 , 0 , 0])
-					new_surf_rect = new_surf.get_rect()
-					pg.draw.circle(new_surf , color , (new_surf_rect.w / 2 , new_surf_rect.h / 2) , dist)
-					new_surf.set_alpha(alpha)
-					screen_to_draw.blit(new_surf , (-pg.Vector2(new_surf_rect.size) / 2 + self.zoom_out_image_rect.center) , new_surf_rect)
-				case [x,y]:
-					new_surf = pg.Surface([x , y]).convert_alpha()
-					new_surf.fill(color)
-					new_surf_rect = new_surf.get_rect()
-					new_surf.set_alpha(alpha)
-					screen_to_draw.blit(new_surf , (-pg.Vector2(new_surf_rect.size) / 2 + self.zoom_out_image_rect.center) , new_surf_rect)
-
+			multiplier = self.player.get_multiplier(effect)
+			if type(dist) in [float , int]:
+				new_surf = pg.Surface([dist * 2 * multiplier] * 2).convert_alpha()
+				new_surf.fill([0 , 0 , 0 , 0])
+				new_surf_rect = new_surf.get_rect()
+				pg.draw.circle(new_surf , color , (new_surf_rect.w / 2 , new_surf_rect.h / 2) , dist)
+				new_surf.set_alpha(alpha)
+				screen_to_draw.blit(new_surf , (-pg.Vector2(new_surf_rect.size) / 2 + self.zoom_out_image_rect.center) , new_surf_rect)
+			elif len(dist) == 2:
+				x , y = dist
+				new_surf = pg.Surface([x * multiplier , y * multiplier]).convert_alpha()
+				new_surf.fill(color)
+				new_surf_rect = new_surf.get_rect()
+				new_surf.set_alpha(alpha)
+				screen_to_draw.blit(new_surf , (-pg.Vector2(new_surf_rect.size) / 2 + self.zoom_out_image_rect.center) , new_surf_rect)
 
 def get_ang(card1 , card2):
 	"""

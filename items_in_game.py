@@ -17,7 +17,7 @@ class MapObject(MovingObj , Sprite , Animations):
 		this_dict = ITEMS_INFO_DICT.get(item_idx)
 		area = this_dict.get("size")
 		clues = this_dict.get('clues')
-		active_effects = this_dict.get('active_effects')
+		card_idx = this_dict.get('card_idx')
 		Sprite.__init__(self , *groups)
 		Animations.__init__(self ,area = area , pos = pos , images_idx = item_idx , dict_with_images =ITEMS_IMAGES_DICT )
 		MovingObj.__init__(self)
@@ -26,7 +26,7 @@ class MapObject(MovingObj , Sprite , Animations):
 			clues = []
 		if type(clues) not in [list , tuple , set]:
 			clues = list(clues)
-		self.active_effects = active_effects
+		self.card_idx = card_idx
 		self.clues = clues
 
 	def check_discover(self , clues):
@@ -58,24 +58,28 @@ class MapObject(MovingObj , Sprite , Animations):
 		self.discovered = False
 
 	def draw(self , screen_to_draw):
+		"""
+		draw the item in the screen
+		:param screen_to_draw:
+		:return:
+		"""
 		if self.discovered:
 			Animations.draw(self , screen_to_draw)
 
 	def update(self):
+		"""
+		update handlers
+		:return:
+		"""
 		Animations.update(self)
 
-	def use_me(self , player):
-		for kind , effect , duration , size in self.active_effects:
-			center = pg.Vector2(self.rect.center)
-			for character in characters_group:
-				match size:
-					case int(x) | float(x):
-						size = calc_proportional_size(size)
-						if center.distance_to(character.rect.center) <= x:
-							character.add_effects(kind , effect , duration)
-					case [x , y]:
-						effect_rect = pg.Rect((0 , 0) , calc_proportional_size([x , y]))
-						effect_rect.center = center
-						if character.rect.colliderect(effect_rect):
-							character.add_effects(kind , effect , duration)
-
+	def get_me(self , deck = None):
+		"""
+		add this card to the main battle deck
+		:return:
+		"""
+		if deck is None:
+			for player in players_group:
+				deck = player.get_deck()
+		deck.new_card(self.card_idx)
+		self.kill()

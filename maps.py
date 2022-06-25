@@ -7,7 +7,8 @@ give the size, save the items for the player to discover.
 from variables import *
 from definitions import *
 from effects import Effect
-from pygame.sprite import Sprite
+from items_in_game import MapObject
+from pygame.sprite import Sprite , Group
 from animations import Animations
 from moving_object import MovingObj
 
@@ -18,26 +19,32 @@ class Maps(Sprite , Animations , MovingObj):
 	update the effects and interactions
 	gets the virtual size in meters
 	"""
-	def __init__(self , idx_map , item_dict = None , rect = screen_rect):
+	def __init__(self , idx_map , secrets_list = None , rect_to_be = screen_rect , groups = None):
 		"""
 		this class will be a way to interact with the effects, and locate teh player in the screen,
 		also give bounds so that the player is always on screen.
 		:param idx_map: int for the MAPS_IMAGES_DICT in variables and definitions.
-		:param rect: pg.Rect to be drawn.
+		:param rect_to_be: pg.Rect to be drawn.
 		:param item_dict: a dictionary of the items in this map.
 		"""
-		Sprite.__init__(self)
+		if groups is None:
+			groups = []
+		if groups not in [list , set , tuple]:
+			groups = [groups]
+		Sprite.__init__(self , *groups)
 		# MovingObj.__init__(self)
-		if item_dict is None:
-			item_dict = {}
+		if secrets_list is None:
+			secrets_list = []
 		self.area , self.name = MAPS_INFO.get(idx_map)
-		change_map_proportion(self , rect)
-		Animations.__init__(self , images_idx = idx_map , area = self.area , dict_with_images = MAPS_IMAGES_DICT , rect_to_be = rect)
-		self.secrets = item_dict
-		self.effects = pg.sprite.Group()
+		change_map_proportion(self , rect_to_be)
+		Animations.__init__(self , images_idx = idx_map , area = self.area , dict_with_images = MAPS_IMAGES_DICT , rect_to_be = rect_to_be)
+		self.secrets = Group()
+		self.effects = Group()
+		self.create_secrets(secrets_list = secrets_list)
 
-		# self.max_rect.topleft = max_rect.topleft
-		maps_group.add(self)
+	def create_secrets(self , secrets_list):
+		for item_idx , pos in secrets_list:
+			MapObject(pos = pos , item_idx = item_idx , groups = [self.secrets , items_group])
 
 	def draw(self , screen_to_draw):
 		"""
@@ -46,11 +53,12 @@ class Maps(Sprite , Animations , MovingObj):
 		:return:
 		"""
 		Animations.draw(self  , screen_to_draw)
-		# if self.images:
-		# 	screen_to_draw.blit(self.images , self.max_rect)
-		# else:
-		# 	pg.draw.max_rect(screen_to_draw , "red" , self.max_rect)
+		self.draw_secrets(screen_to_draw)
 		self.draw_effects(screen_to_draw)
+
+	def draw_secrets(self , screen_to_draw):
+		for secret in self.secrets:
+			secret.draw(screen_to_draw)
 
 	def draw_effects(self , screen_to_draw):
 		surf_effects = pg.Surface(screen_rect.size).convert_alpha()
@@ -120,7 +128,7 @@ class Maps(Sprite , Animations , MovingObj):
 		:param action: if given, a different action will be taken, meaning, only the image from the dict will be used
 		:return: Effect Object
 		"""
-		Effect(idx_effect , pos , area , duration , action , groups = [self.effects , effects_group] , rect_to_be = self.rect_to_be)
+		Effect(idx_effect , pos , area , duration , action , groups = [self.effects , effects_group] , rect_to_be = self.rect)
 
 	def effects_update(self):
 		for effect in self.effects:

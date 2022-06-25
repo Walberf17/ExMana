@@ -24,8 +24,9 @@ class Effect(Sprite , Animations , MovingObj):
 		:param action: str: the actual effect of this effect
 		:param groups: list of groups for the effect to be inserted
 		"""
+
 		if pos is None:
-			pos = rect_to_be.center
+			pos = pg.mouse.get_pos()
 		if groups is None:
 			groups = []
 		Sprite.__init__(self , *groups)
@@ -39,11 +40,15 @@ class Effect(Sprite , Animations , MovingObj):
 			action = EFFECT_INFO.get(self.images_idx)
 		self.action = action
 		self.image_index = [0 , 0]
-		self.image_index_differ = random.randint(0 , self.sprite_grid[0])
+		if self.images:
+			self.image_index_differ = random.randint(0 , self.sprite_grid[0])
+		else:
+			self.image_index_differ = 0
 
 
 	def draw(self , screen_to_draw):
 		Animations.draw(self , screen_to_draw)
+		pg.draw.rect(screen_to_draw , 'red' , self.rect , 4)
 
 	def create_rect_to_draw(self):
 		"""
@@ -57,7 +62,7 @@ class Effect(Sprite , Animations , MovingObj):
 		return pg.Rect(init_x , init_y , w , h)
 
 	def update(self):
-		Animations.update(self)
+		Animations.update(self , always_on_rect = False)
 		if self.duration <= 0 or self.duration is None:
 			self.kill()
 

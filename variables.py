@@ -30,6 +30,7 @@ decks_group = set()
 ######## Variables
 FORCE_TO_CARDS = 2
 CARD_SIZE = [screen_rect.w * 0.15 , screen_rect.h * .15]
+BATTLE_DECK = [5, 5 , 5]
 
 ######## Fonts for texts
 font_size = int(screen_rect.h * .1)
@@ -145,9 +146,9 @@ EFFECT_INTERACTIONS = [
 scene_test_dict = {
 	"draw": [maps_group , text_boxes_group , monsters_group , selection_group , players_group ,
 	         cards_group , items_group , buttons_group , pointer_group , decks_group] ,
-	"click_down": [buttons_group , selection_group , moving_objects_group , decks_group] ,
-	"update": [buttons_group , maps_group , players_group , selection_group] ,
-	"move": [buttons_group , selection_group , moving_objects_group]
+	"click_down": [buttons_group , selection_group , players_group , decks_group , moving_objects_group] ,
+	"update": [buttons_group , maps_group , players_group , selection_group , moving_objects_group] ,
+	"move": [buttons_group , players_group, selection_group , moving_objects_group]
 }
 
 EQUIPAMENTS_DICT = {  # name:str , description:str , place:str , modifiers: dict of status to modify and number
@@ -171,33 +172,33 @@ POSSIBLE_CLUES = [
 ]
 
 ITEMS_INFO_DICT = {
-	'bread1' : {'size':[.5,.5] , 'clues' : ['sight'] , 'active_effects': ['fire_damage(-5)' , 0 , .5]},
+	'bread1' : {'size':[.5,.5] , 'clues' : ['sight'] , 'card_idx':2},
 
 }
 
-
 effects_and_damages = [
-	"fire_damage" ,
-	"ice_damage" ,
-	"poison_damage" ,
-	"ground_damage" ,
-	"wind_damage" ,
-	"electric_damage" ,
-	"dark_damage" ,
-	"light_damage" ,
-	"time_damage" ,
-	"oil_damage" ,
-	"gravity_damage" ,
-	"space_damage" ,
-	"pure_damage" ,
-	"stress_damage" ,
-	"physical_damage" ,
-	"feel_smell" ,
-	"feel_taste" ,
-	"feel_sight" ,
-	"search" ,
-	"throughtful_search" ,
-	"move_card" ,
+	"fire_damage" ,  # usual args = (value)
+	"ice_damage" , # usual args = (value)
+	"poison_damage" , # usual args = (value)
+	"ground_damage" , # usual args = (value)
+	"wind_damage" , # usual args = (value)
+	"electric_damage" , # usual args = (value)
+	"dark_damage" , # usual args = (value)
+	"light_damage" , # usual args = (value)
+	"time_damage" , # usual args = (value)
+	"oil_damage" , # usual args = (value)
+	"gravity_damage" , # usual args = (value)
+	"space_damage" , # usual args = (value)
+	"pure_damage" , # usual args = (value)
+	"stress_damage" , # usual args = (value)
+	"physical_damage" , # usual args = (value)
+	"feel_smell" , # usual args = (pos , area)
+	"feel_taste" , # usual args = (pos , area)
+	"feel_sight" , # usual args = (pos , area)
+	"search" , # usual args = (pos , area)
+	"throughtful_search" , # usual args = (pos , area)
+	"move_card" , # usual args = (value)
+	"get_item", # usual args = (self.rect , size)
 
 ]
 
@@ -216,39 +217,39 @@ CARDS_DICT = {
 	# size: list if max_rect , int if circle
 	1: {
 		"name": 'Descanse em Paz' ,
-		'active_effects': [['Fire' , 'stress_damage(30)' , 0 , .5]] ,
+		'active_effects': [['Get' , "get_item(size)" , 0 , .5]] ,
 		'cost': 15 ,
 		'melee': False ,
 	} ,
 	2: {
 		'name': 'Cafungada Monstra' ,
-		'map_effect': [['Smell' , 'feel_smell(1)' , 0, .2]] ,
+		'active_effects': [['Smell' , 'feel_world(size , kind)' , 0, .2]] ,
 		'cost': 5 ,
 		'melee': True ,
 	} ,
 	3: {
 		'name': 'Assadura Grave' ,
-		'active_effects': [['Fire' , 'fire_damage(10)' , 0 , [1 , 1]] , ['Fire' , 'fire_damage(5)' , 5 , [1 , 1]]] ,
-		'map_effect': [['Fire' , 'fire_damage(5)' , 1 , [2 , 2]]] ,
+		'active_effects': [['Fire' , 'fire_damage(-10)' , 0 , [1 , 1]] , ['Fire' , 'fire_damage(-5)' , 5 , [1 , 1]]] ,
+		'map_effect': [['Fire' , 'fire_damage(-5)' , 1 , [2 , 2]]] ,
 		'cost': 15 ,
 		'melee': False ,
 	} ,
 	4: {
 		'name': '22º em Moc' ,
-		'active_effects': [['Ice' , 'ice_damage(10)' , 0 , [1 , 1]] , ['Ice' , 'ice_damage(5)' , 4 , [2 , 2]]] ,
-		'map_effect': [['Ice' , 'ice_damage(5)' , 0 , [2 , 2]]] ,
+		'active_effects': [['Ice' , 'ice_damage(-10)' , 0 , [1 , 1]] , ['Ice' , 'ice_damage(-5)' , 4 , [2 , 2]]] ,
+		'map_effect': [['Ice' , 'ice_damage(-5)' , 0 , [2 , 2]]] ,
 		'cost': 15 ,
 		'melee': False ,
 	} ,
 	5: {
-		'name': 'Movimento - Direita' ,
-		'active_effects': [['Move' , 'move_card([2,0])' , 0 , .2]] ,
+		'name': 'Movimento - 2m/pixel' ,
+		'active_effects': [['Move' , 'move_card(1)' , 0 , .1]] ,
 		'cost': 5 ,
 		'melee': True ,
 	} ,
 	6: {
 		'name': 'Movimento - Cima' ,
-		'active_effects': [['Move' , 'move_card([0,-1])' , 0 , .2]] ,
+		'active_effects': [['Move' , 'move_card(3)' , 0 , .2]] ,
 		'cost': 5 ,
 		'melee': True ,
 	} ,
@@ -266,22 +267,22 @@ CARDS_DICT = {
 	} ,
 	9: {
 		'name': 'Artigo de Luxo' ,
-		'active_effects': [["Oil" , 'oil_damage(10)' , 0 , [1 , 1]] , ['poison_damage(5)' , 5 , [1 , 1]]] ,
-		'map_effect': [['Oil' , 'oil_damage(5)' , 0 , [2 , 2]]] ,
+		'active_effects': [["Oil" , 'oil_damage(-10)' , 0 , [1 , 1]] , ['poison_damage(-5)' , 5 , [1 , 1]]] ,
+		'map_effect': [['Oil' , 'oil_damage(-5)' , 0 , [2 , 2]]] ,
 		'cost': 7 ,
 		'melee': False ,
 	} ,
 	10: {
 		'name': 'Água Oxigenada 40 Volumes' ,
 		'active_effects': [["Poison" , 'poison_damage(-2)' , 0 , .5] , ] ,
-		'map_effect': [['Poison' , 'poison_damage(5)' , 0 , [2 , 2]]] ,
+		'map_effect': [['Poison' , 'poison_damage(-5)' , 0 , [2 , 2]]] ,
 		'cost': 1 ,
 		'melee': True ,
 	} ,
 	11: {
 		'name': 'Demo com Espada' ,
-		'active_effects': [["Poison" , 'poison_damage(4)' , 0 , .5] , ["Poison" , 'stress_damage(4)' , 0 , .5] ,
-		                   ["Poison" , 'physical_damage(2)' , 5 , .5]] ,
+		'active_effects': [["Poison" , 'poison_damage(-4)' , 0 , .5] , ["Poison" , 'stress_damage(-4)' , 0 , .5] ,
+		                   ["Poison" , 'physical_damage(-2)' , 5 , .5]] ,
 		'cost': 1 ,
 		'melee': True ,
 	} ,
