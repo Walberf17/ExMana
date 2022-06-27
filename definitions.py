@@ -12,7 +12,6 @@ def calc_proportional_size(expected = None , max_area = None , max_rect = None):
 	:param max_rect:
 	:return:
 	"""
-
 	if max_rect is None:
 		for maps in maps_group:
 			max_rect = maps.rect
@@ -34,26 +33,6 @@ def calc_proportional_size(expected = None , max_area = None , max_rect = None):
 	else:
 		raise TypeError(f'value not good enought, {expected}')
 
-
-def calc_proportional_size4(old_size):
-	"""
-	Converts the size of a given object relative to the actual map
-	:param old_size: size in the same unit as the map
-	:return: new sizes proportional to the image
-	"""
-	match old_size:
-		case int(x) | float(x):
-			return map_proportion.x * x
-		case [x , y] | (x , y):
-			a = map_proportion.x * x
-			b = map_proportion.y * y
-			return [a , b]
-		case [x , y , w , h]:
-			a = map_proportion.x * x
-			b = map_proportion.y * y
-			c = map_proportion.x * w
-			d = map_proportion.y * h
-			return [a , b , c , d]
 
 def equip_item(item , place):
 	for player in players_group:

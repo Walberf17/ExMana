@@ -5,7 +5,7 @@ they will inherit from character, but will take the speeches, give quests or ite
 from characters import Character
 from variables import *
 from definitions import *
-from npc_speeches import *
+from npc_infos import *
 
 
 class NPCs(Character):

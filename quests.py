@@ -1,4 +1,5 @@
 from definitions import *
+from quests_info import QUEST_DICT
 from variables import *
 
 class Quest:

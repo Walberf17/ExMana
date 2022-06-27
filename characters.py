@@ -4,32 +4,34 @@ This is a internal class, a class that will be a base for other.
 This class will create a character and give it default actions.
 """
 import random
-from pygame.sprite import Sprite
+
+from images_info import CHARACTER_IMAGES_DICT
+from items_info import *
 from variables import *
 from definitions import *
 from animations import Animations
 from moving_object import MovingObj
-import math
+from math import cos , sin
 
 
-class Character(Sprite , Animations , MovingObj):
+class Character(Animations , MovingObj):
 	"""
 	This class is a base class for other players and monsters
 	"""
 
-	def __init__(self , images_idx = None , rect_to_be = screen_rect , groups = None):
+	def __init__(self , images_idx = None , rect_to_be = screen_rect ,
+	             groups = None , pos = None , relative_pos = None):
 		"""
 
 		:param images_idx: image from the dictionary to get
 		:param groups: groups to add
 		"""
-		if groups is None:
-			groups = []
-		Sprite.__init__(self, *groups)
 		MovingObj.__init__(self)
 		self.default_height = random.randrange(160 , 210) / 100
 		self.default_width = random.randrange(30 , 60) / 100
-		Animations.__init__(self , images_idx = images_idx , area = [self.default_width , self.default_height] , dict_with_images = CHARACTER_IMAGES_DICT , rect_to_be = rect_to_be)
+		Animations.__init__(self , images_idx = images_idx , area = [self.default_width , self.default_height] ,
+		                    dict_with_images = CHARACTER_IMAGES_DICT , rect_to_be = rect_to_be , pos = pos ,
+		                    relative_pos = relative_pos , groups = groups)
 		sight = [5 , 10]
 
 		# default values for this character
@@ -62,7 +64,6 @@ class Character(Sprite , Animations , MovingObj):
 		self.wisdom = self.default_wisdom
 		self.melee_meters = self.default_melee_dist
 		self.melee_pixels = calc_proportional_size(self.melee_meters)
-		self.rect = pg.Rect((0 , 0) , (calc_proportional_size([self.default_height , self.default_width])))
 		self.clicked = False
 		self.status = {}  # status to calc in game
 		self.equipments = {
@@ -88,6 +89,8 @@ class Character(Sprite , Animations , MovingObj):
 		self.abnormal_effects = {}
 		self.calc_status()
 		self.change_sizes_proportion()
+		self.to_move_point = pg.Vector2(self.rect.center)
+
 
 		# quests
 		self.quests = set()
@@ -96,7 +99,6 @@ class Character(Sprite , Animations , MovingObj):
 		self.to_retrieve_quest = set()
 		self.to_collect_quest = set()
 		self.to_NPC_quest = set()
-
 
 	### Change things for the game
 
@@ -110,8 +112,6 @@ class Character(Sprite , Animations , MovingObj):
 		self.sight_pixels = calc_proportional_size(self.sight_meters)
 		self.melee_pixels = calc_proportional_size(self.melee_meters)
 
-
-
 	### interactions with the player
 
 	def draw(self , screen_to_draw):
@@ -121,6 +121,7 @@ class Character(Sprite , Animations , MovingObj):
 		:return: None
 		"""
 		Animations.draw(self , screen_to_draw)
+		# pg.draw.circle(screen_to_draw , 'green' , self.to_move_point , 40)
 
 	def update(self , **kwargs):
 		"""
@@ -130,6 +131,7 @@ class Character(Sprite , Animations , MovingObj):
 		"""
 		Animations.update(self , self.velocity)
 		MovingObj.update(self)
+
 
 
 		# check hp
@@ -144,7 +146,7 @@ class Character(Sprite , Animations , MovingObj):
 		return mask
 
 	def kill(self):
-		Sprite.kill()
+		Animations.kill(self)
 
 	# change Default Status
 
@@ -336,37 +338,31 @@ class Character(Sprite , Animations , MovingObj):
 
 	# actions
 
-	def get_item(self , size):
-		"""
-		get the card and add it to the deck
-		:param size: area in meters to search
-		:return:
-		"""
-		center = pg.Vector2(pg.mouse.get_pos())
-		for obj in items_group:
-			match size:
-				case int(x) | float(x):
-					if center.distance_to(obj.rect.center) <= x:
-						obj.get_me(self.main_deck)
-				case [x , y]:
-					effect_rect = pg.Rect((0 , 0) , [x , y])
-					effect_rect.center = center
-					if obj.rect.colliderect(effect_rect):
-						obj.get_me(self.main_deck)
-
 	def move_card(self , meters):
 		"""
 		not ready yet, it will move the players up to that many meters
 		:param meters: size in meters
 		:return: None
 		"""
-		pos = pg.Vector2(pg.mouse.get_pos())
-		dist = pos.distance_to(self.rect.center)
-		max_d = self.melee_pixels
-		ang = get_ang(self.rect.center , pos)
-		meters = calc_proportional_size(meters/1000)
-		vel = [math.cos(ang)*(meters*(dist/max_d)) , math.sin(ang)*(meters)]
-		self.acceleration = pg.Vector2(calc_proportional_size(vel))*self.get_multiplier("Move")
+		mouse_pos = pg.Vector2(pg.mouse.get_pos()) # the position of the mouse
+		max_dist = calc_proportional_size(meters) # max distance to travel
+		if mouse_pos.distance_to(self.rect.center) <= max_dist:
+			self.to_move_point = mouse_pos
+		else:
+			ang = get_ang(self.rect.center , mouse_pos)
+			self.to_move_point = pg.Vector2(max_dist*cos(ang) , max_dist*sin(ang))+self.rect.center
+
+	def calc_acceleration(self):
+		return
+
+	def calc_velocity(self):
+		ang = get_ang(self.rect.center , self.to_move_point)
+		max_vel = 15 + self.velocity*10/100
+		dist_to_point = self.to_move_point.distance_to(self.rect.center)
+		max_dist = 300
+		vel = dist_to_point * max_vel / max_dist
+		real_vel = min([vel , max_vel])
+		self.moving_velocity = pg.Vector2([(real_vel*cos(ang)) , (real_vel*sin(ang))])
 
 	def physical_attack(self , power):
 		pass
@@ -389,36 +385,26 @@ class Character(Sprite , Animations , MovingObj):
 		velocity = self.default_velocity
 		time = self.default_time
 		will = self.default_will
-		wisdow = self.default_wisdom
+		wisdom = self.default_wisdom
 		melee_dist = self.melee_meters
 		for _ , item in self.equipments.items():
 			if item is not None:
 				dict_item = EQUIPAMENTS_DICT.get(item)
 				modifiers = dict_item.get("modifiers")
+				modifier_dict = {"height": height,
+							'width': width,
+							"melee_meters": melee_dist,
+							"sight": sight_meters,
+							"velocity": velocity,
+							"hp": hp,
+							"strength": strength,
+							"resilience": resilience,
+							"mana": mana,
+							"will": will,
+							"wisdom": wisdom,
+				            }
 				for modifier , value in modifiers.items():
-					match modifier:
-						case "height":
-							height += value
-						case 'width':
-							width += value
-						case "melee_meters":
-							melee_dist += value
-						case "sight":
-							sight_meters += value
-						case "velocity":
-							velocity += value
-						case "hp":
-							hp += value
-						case "strength":
-							strength += value
-						case "resilience":
-							resilience += value
-						case "mana":
-							mana += value
-						case "will":
-							will += value
-						case "wisdom":
-							wisdow += value
+					modifier_dict[modifier] += value
 
 		self.strength = strength
 		self.resilience = resilience
@@ -432,7 +418,7 @@ class Character(Sprite , Animations , MovingObj):
 		self.velocity = velocity
 		self.default_time = self.time = time + self.proportion_time_velocity * self.velocity
 		self.will = will
-		self.wisdom = wisdow
+		self.wisdom = wisdom
 		self.melee_meters = melee_dist
 		self.melee_pixels = calc_proportional_size(self.melee_meters)
 
@@ -697,13 +683,12 @@ class Character(Sprite , Animations , MovingObj):
 		pos = pg.mouse.get_pos()
 		for current_map in maps_group:
 			for obj in current_map.get_secrets():
-				match size:
-					case int(x) | float(x):
+				if type(size) in (int , float):
 						pos = pg.Vector2(pos)
-						if pos.distance_to(obj.rect.center) <= x:
+						if pos.distance_to(obj.rect.center) <= size:
 							if obj.check_discover(kind):
 								obj.discover()
-					case [x , y]:
+				elif type(size) in [list , tuple] and len(size) == 2:
 						effect_rect = pg.Rect((0 , 0) , size)
 						effect_rect.center = pos
 						if obj.rect.colliderect(effect_rect):

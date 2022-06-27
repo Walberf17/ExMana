@@ -2,8 +2,9 @@
 this will work with the maps, it will create a map, give the proportions,
 give the size, save the items for the player to discover.
 """
-
-
+from effects_info import EFFECT_INTERACTIONS
+from images_info import MAPS_IMAGES_DICT
+from maps_info import *
 from variables import *
 from definitions import *
 from effects import Effect
@@ -12,7 +13,7 @@ from pygame.sprite import Sprite , Group
 from animations import Animations
 from moving_object import MovingObj
 
-class Maps(Sprite , Animations , MovingObj):
+class Maps(Animations , MovingObj):
 	"""
 	This map is not a grid (v2.0)
 	it draws itself.
@@ -27,18 +28,13 @@ class Maps(Sprite , Animations , MovingObj):
 		:param rect_to_be: pg.Rect to be drawn.
 		:param item_dict: a dictionary of the items in this map.
 		"""
-		if groups is None:
-			groups = []
-		if groups not in [list , set , tuple]:
-			groups = [groups]
-		Sprite.__init__(self , *groups)
 		# MovingObj.__init__(self)
 		if secrets_list is None:
 			secrets_list = []
 		self.map_idx = idx_map
 		self.area , self.name = MAPS_INFO.get(idx_map)
 		change_map_proportion(self , rect_to_be)
-		Animations.__init__(self , images_idx = idx_map , area = self.area , dict_with_images = MAPS_IMAGES_DICT , rect_to_be = rect_to_be)
+		Animations.__init__(self , images_idx = idx_map , area = self.area , dict_with_images = MAPS_IMAGES_DICT , rect_to_be = rect_to_be , groups = groups)
 		self.secrets = Group()
 		self.effects = Group()
 		self.create_secrets(secrets_list = secrets_list)

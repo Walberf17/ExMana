@@ -3,12 +3,14 @@ Create and manage effects in the field.
 """
 import random
 from animations import Animations
+from images_info import EFFECT_DICT
 from variables import *
 from definitions import *
 from pygame.sprite import Sprite
 from moving_object import MovingObj
+from effects_info import *
 
-class Effect(Sprite , Animations , MovingObj):
+class Effect(Animations , MovingObj):
 	"""
 	This class sets the effects
 	it inits
@@ -27,14 +29,11 @@ class Effect(Sprite , Animations , MovingObj):
 
 		if pos is None:
 			pos = pg.mouse.get_pos()
-		if groups is None:
-			groups = []
-		Sprite.__init__(self , *groups)
 		# MovingObj.__init__(self)
 		if area is None:
 			area = [1 , 1]
 		self.name = idx_effect
-		Animations.__init__(self , images_idx = self.name , area = area , dict_with_images = EFFECT_DICT , rect_to_be = rect_to_be , pos = pos)
+		Animations.__init__(self , images_idx = self.name , area = area , dict_with_images = EFFECT_DICT , rect_to_be = rect_to_be , pos = pos , groups = groups)
 		self.duration = duration
 		if action is None:
 			action = EFFECT_INFO.get(self.images_idx)
@@ -61,7 +60,7 @@ class Effect(Sprite , Animations , MovingObj):
 		init_y = (h * j)
 		return pg.Rect(init_x , init_y , w , h)
 
-	def update(self):
+	def update(self , *args , **kwargs):
 		Animations.update(self , always_on_rect = False)
 		if self.duration <= 0 or self.duration is None:
 			self.kill()

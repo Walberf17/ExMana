@@ -30,6 +30,7 @@ class MovingObj:
 		if self.clicked:
 			mouse_move = pg.mouse.get_rel()
 			self.rect.move_ip(mouse_move)
+			self.to_move_point = pg.Vector2(pg.mouse.get_pos())
 		self.rect.move_ip(self.moving_velocity)
 
 

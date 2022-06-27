@@ -6,10 +6,11 @@ there will be 2 decks: adventure and battle
 import random
 import math
 from variables import *
-from pygame.sprite import Sprite
 from animations import Animations
 from moving_object import MovingObj
 from definitions import *
+from deck_and_cards_info import *
+from images_info import CARDS_IMAGES
 
 
 
@@ -126,16 +127,13 @@ class Deck:
 		for card in self.hand:
 			card.draw(screen_to_draw)
 
-class Card(Sprite , Animations , MovingObj):
+class Card(Animations , MovingObj):
 	"""
 	this class works with the cards in hand, the cards that will be shown on the screen.
 	"""
 	def __init__(self, idx , deck , player , groups = None):
-		if groups is None:
-			groups = []
-		Sprite.__init__(self , *groups)
 		MovingObj.__init__(self)
-		Animations.__init__(self , images_idx = idx , area = (1,1.4) , dict_with_images = CARDS_IMAGES , rect_to_be = screen_rect , pos = (random.randint( 1 , screen_rect.w) , screen_rect.h*.95))
+		Animations.__init__(self , images_idx = idx , area = (1,1.4) , dict_with_images = CARDS_IMAGES , rect_to_be = screen_rect , pos = (random.randint( 1 , screen_rect.w) , screen_rect.h*.95) , groups = groups)
 		this_dict = CARDS_DICT.get(idx)
 		if self.images:
 			self.close_up_image = pg.transform.scale(self.original_images , [self.rect.w * 3 , self.rect.h * 3])
@@ -204,12 +202,11 @@ class Card(Sprite , Animations , MovingObj):
 			else:
 				center = pg.Vector2(self.rect.center)
 				for character in characters_group:
-					match size:
-						case int(x) | float(x):
-							if center.distance_to(character.rect.center) <= x:
+					if type(size) in (int , float):
+							if center.distance_to(character.rect.center) <= size:
 								character.add_effects(kind , effect , duration)
-						case [x , y]:
-							effect_rect = pg.Rect((0,0) , calc_proportional_size([x,y]))
+					elif type(size) in [list , tuple] and len(size) == 2:
+							effect_rect = pg.Rect((0,0) , calc_proportional_size(size))
 							effect_rect.center = center
 							if character.rect.colliderect(effect_rect):
 								character.add_effects(kind , effect , duration)
