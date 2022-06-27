@@ -4,7 +4,6 @@ This is a internal class, a class that will be a base for other.
 This class will create a character and give it default actions.
 """
 import random
-
 from images_info import CHARACTER_IMAGES_DICT
 from items_info import *
 from variables import *
