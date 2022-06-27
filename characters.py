@@ -9,6 +9,7 @@ from variables import *
 from definitions import *
 from animations import Animations
 from moving_object import MovingObj
+from quests import Quest
 import math
 
 
@@ -89,6 +90,15 @@ class Character(Sprite , Animations , MovingObj):
 		self.calc_status()
 		self.change_sizes_proportion()
 
+		# quests
+		self.quests = set()
+		self.to_kill_quest = set()
+		self.to_place_quest = set()
+		self.to_retrieve_quest = set()
+		self.to_collect_quest = set()
+		self.to_NPC_quest = set()
+
+
 	### Change things for the game
 
 	def change_sizes_proportion(self):
@@ -129,6 +139,22 @@ class Character(Sprite , Animations , MovingObj):
 		init_x = self.rect.left + (w * i)
 		init_y = self.rect.top + (h * j)
 		return pg.Rect(init_x , init_y , w , h)
+
+	def give_quest(self , idx):
+		kind = QUEST_DICT.get(idx).get('Kind')
+		groups = []
+		groups.append(self.quests)
+		kind_dict = {
+			'Place': self.to_place_quest ,
+			'NPC': self.to_NPC_quest ,
+			'Retrieve': self.to_retrieve_quest ,
+			'Collect': self.to_collect_quest ,
+			'Kill': self.to_kill_quest ,
+		}
+
+		groups.append(kind_dict.get(kind , []))
+		Quest(quest_index = idx , groups = groups , player = self)
+
 
 	### interactions with the player
 

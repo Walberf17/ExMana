@@ -35,6 +35,7 @@ class Maps(Sprite , Animations , MovingObj):
 		# MovingObj.__init__(self)
 		if secrets_list is None:
 			secrets_list = []
+		self.map_idx = idx_map
 		self.area , self.name = MAPS_INFO.get(idx_map)
 		change_map_proportion(self , rect_to_be)
 		Animations.__init__(self , images_idx = idx_map , area = self.area , dict_with_images = MAPS_IMAGES_DICT , rect_to_be = rect_to_be)
@@ -136,6 +137,9 @@ class Maps(Sprite , Animations , MovingObj):
 
 	def get_virtual_size(self):
 		return self.area
+
+	def get_map_idx(self):
+		return self.map_idx
 
 	def get_secrets(self):
 		return self.secrets
