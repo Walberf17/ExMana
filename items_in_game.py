@@ -18,11 +18,11 @@ class MapObject(MovingObj , Animations):
 		Sprite.__init__(self , *groups)
 		Animations.__init__(self ,area = area , pos = pos , images_idx = item_idx , dict_with_images =ITEMS_IMAGES_DICT , groups = groups)
 		MovingObj.__init__(self)
-		self.discovered = True
+		self.discovered = False
 		if clues is None:
 			clues = []
 		if type(clues) not in [list , tuple , set]:
-			clues = list(clues)
+			clues = [clues]
 		self.card_idx = card_idx
 		self.clues = clues
 
@@ -32,9 +32,9 @@ class MapObject(MovingObj , Animations):
 		:param clues: strings or list of strings
 		:return: True if at least one of the clues are in self.clues.
 		"""
-		if type(clues) not in [list , tuple , set]:
-			clues = list(clues)
 
+		if type(clues) not in [list , tuple , set]:
+			clues = [clues]
 		for clue in clues:
 			if clue in self.clues:
 				return True

@@ -26,14 +26,13 @@ class Effect(Animations , MovingObj):
 		:param action: str: the actual effect of this effect
 		:param groups: list of groups for the effect to be inserted
 		"""
-
 		if pos is None:
 			pos = pg.mouse.get_pos()
 		# MovingObj.__init__(self)
 		if area is None:
 			area = [1 , 1]
 		self.name = idx_effect
-		Animations.__init__(self , images_idx = self.name , area = area , dict_with_images = EFFECT_DICT , rect_to_be = rect_to_be , pos = pos , groups = groups)
+		Animations.__init__(self , images_idx = self.name , color = MAP_EFFECTS[idx_effect]['color'] , area = area , dict_with_images = EFFECT_DICT , rect_to_be = rect_to_be , pos = pos , groups = groups)
 		self.duration = duration
 		if action is None:
 			action = EFFECT_INFO.get(self.images_idx)
@@ -47,7 +46,7 @@ class Effect(Animations , MovingObj):
 
 	def draw(self , screen_to_draw):
 		Animations.draw(self , screen_to_draw)
-		pg.draw.rect(screen_to_draw , 'red' , self.rect , 4)
+		# pg.draw.rect(screen_to_draw , 'red' , self.rect , 4)
 
 	def create_rect_to_draw(self):
 		"""

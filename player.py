@@ -4,9 +4,21 @@ from definitions import *
 import pygame as pg
 from characters import Character
 from quests import Quest
+import json
 
 
 class Player(Character):
+
+	def __init__(self , *args , **kwargs):
+		super().__init__(*args , **kwargs)
+		loaded_dict = self.load_character()
+		self.quests = loaded_dict.get('quests' , list())
+		self.to_kill_quest = loaded_dict.get('to_kill_quest' , list())
+		self.to_place_quest = loaded_dict.get('to_place_quest' , list())
+		self.to_retrieve_quest = loaded_dict.get('to_retrieve_quest' , list())
+		self.to_collect_quest = loaded_dict.get('to_collect_quest' , list())
+		self.to_NPC_quest = loaded_dict.get('to_NPC_quest' , list())
+
 	def set_deck(self , deck = None , adventure = None):
 		"""
 		Set a deck to the player.
@@ -56,7 +68,6 @@ class Player(Character):
 			'Collect': self.to_collect_quest ,
 			'Kill': self.to_kill_quest ,
 		}
-
 		groups.append(kind_dict.get(kind , []))
 		Quest(quest_index = idx , groups = groups , player = self)
 
@@ -177,3 +188,46 @@ class Player(Character):
 					effect_rect.center = center
 					if obj.rect.colliderect(effect_rect):
 						obj.get_me(self.main_deck)
+
+	def save_character(self):
+		new_dict = {
+			'images_idx':               self.images_idx ,
+			'default_strength':         self.default_strength ,
+			'default_resilience':       self.default_resilience ,
+			'default_height':           self.default_height,
+			'default_width':            self.default_width,
+			'default_sight_meters':     self.default_sight_meters ,
+			'sex':                      self.sex ,
+			'default_mana':             self.default_mana ,
+			'default_hp':               self.default_hp ,
+			'default_velocity':         self.default_velocity ,
+			'default_time':             self.default_time ,
+			'default_will':             self.default_will ,
+			'default_wisdom':           self.default_wisdom ,
+			'default_melee_dist':       self.default_melee_dist ,
+			'level':                    self.level ,
+			'bag':                      self.bag ,
+			'equipments':               self.equipments ,
+			'dominant_hand':            self.dominant_hand ,
+			'other_hand':               self.other_hand ,
+			'proportion_time_velocity': self.proportion_time_velocity,
+			'effects':                  self.effects,
+			'abnormal_effects':         self.abnormal_effects,
+			'quests' :                  self.quests,
+			'to_kill_quest' :           self.to_kill_quest,
+			'to_place_quest' :          self.to_place_quest,
+			'to_retrieve_quest' :       self.to_retrieve_quest,
+			'to_collect_quest' :        self.to_collect_quest,
+			'to_NPC_quest' :            self.to_NPC_quest,
+		}
+		with open(f'./DataInfo/player1.json' , 'w') as file:
+			json.dump(new_dict , file)
+
+	def load_character(self):
+		try:
+			with open(f'./DataInfo/player1.json' , 'r') as file:
+				new_dict = json.load(file)
+				return new_dict
+		except FileNotFoundError:
+			print('Nenhum arquivo. Vou fechar e vc se vira...')
+			return {}

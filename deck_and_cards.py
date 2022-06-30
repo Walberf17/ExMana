@@ -149,6 +149,7 @@ class Card(Animations , MovingObj):
 		self.name = this_dict.get('name')
 		self.active_effects = this_dict.get('active_effects')
 		self.map_effect = this_dict.get('map_effect')
+		self.kind = this_dict.get('kind')
 		self.cost = this_dict.get('cost')
 		self.melee = this_dict.get('melee')
 		self.player = player
@@ -175,21 +176,30 @@ class Card(Animations , MovingObj):
 		"""
 		if self.clicked:
 			self.clicked = False
-			if self.deck.map_rect.collidepoint(self.rect.center):
+			click_up = pg.mouse.get_pos()
+			if self.deck.map_rect.collidepoint(click_up):
 				if self.player.check_in_range(self.melee):
 					if self.player.check_cost(self.cost):
-						self.do_action()
 						self.kill()
+						if self.kind in self.player.get_animated_actions():
+							self.player.set_action(self , click_up)
+						else:
+							self.do_action()
 			return True
 
-	def do_action(self):
+	def get_kind(self):
+		return self.kind
+
+	def do_action(self , pos = None):
+		if pos is None:
+			pos = pg.mouse.get_pos()
 		self.player.consume_cost(self.cost)
 		if self.active_effects:
-			self.do_active_effects()
+			self.do_active_effects(pos)
 		if self.map_effect:
-			self.do_map_effects()
+			self.do_map_effects(pos)
 
-	def do_active_effects(self):
+	def do_active_effects(self , pos):
 		for kind , effect , duration , size in self.active_effects:
 			multiplier = self.player.get_multiplier(effect)
 			size = calc_proportional_size(size)
@@ -200,7 +210,7 @@ class Card(Animations , MovingObj):
 			if kind in ["Smell" , "Taste" , "Sight" , "Search" , "Throughtful Search" , 'Get' , 'Move']:
 				eval(f'self.player.{effect}')
 			else:
-				center = pg.Vector2(self.rect.center)
+				center = pg.Vector2(pos)
 				for character in characters_group:
 					if type(size) in (int , float):
 							if center.distance_to(character.rect.center) <= size:
@@ -211,8 +221,7 @@ class Card(Animations , MovingObj):
 							if character.rect.colliderect(effect_rect):
 								character.add_effects(kind , effect , duration)
 
-	def do_map_effects(self):
-		pos = pg.mouse.get_pos()
+	def do_map_effects(self , pos):
 		for current_map in maps_group:
 			for kind , action , duration , area in self.map_effect:
 				multiplier = self.player.get_multiplier(kind)
@@ -222,10 +231,11 @@ class Card(Animations , MovingObj):
 					area *= multiplier
 				current_map.add_effect(idx_effect = kind, pos = pos , area = area , duration = duration , action = action)
 
-	def update(self):
+	def update(self , **kwargs):
 		"""
 		calcs the forces to move itself.
 		Calcs the position for the close up image
+		:param **kwargs:
 		:return:
 		"""
 
@@ -272,7 +282,7 @@ class Card(Animations , MovingObj):
 		:return:
 		"""
 		if self.clicked:
-			if self.deck.map_rect.collidepoint(self.rect.center):
+			if self.deck.map_rect.collidepoint(pg.mouse.get_pos()):
 				self.zoom_out_image_rect.center = pg.mouse.get_pos()
 				if self.images:
 					screen_to_draw.blit(self.zoom_out_image , self.zoom_out_image_rect)

@@ -1,5 +1,5 @@
 """
-this is a list of speeches for the NPCs to use in game.
+this is a list of speeches for the NPC to use in game.
 """
 
 
@@ -34,7 +34,7 @@ CHILDREN = [
 
 
 # Default NPC dict
-NPCS_KIND_DICT = {
+NPCS_KIND_DICT = { # NPC_idx : the kinds it gets
 	1: [CHILDREN , YOUNG_MEN],
 	2: [YOUNG_WOMEN],
 	3: [YOUNG_MEN]
@@ -42,8 +42,7 @@ NPCS_KIND_DICT = {
 
 NPCS_INFO_DICT = {
 	1 : { # default NPC, a copy of the player
-		'location' : [1.5,1],
-		'size' : [],
+	'kind': [1]
 	}
 }
 

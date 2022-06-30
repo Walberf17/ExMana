@@ -2,7 +2,8 @@
 CHARACTER_IMAGES_DICT = {
 	'path': 'Characters/' ,
 	1: {'adress': "Character1.png" , 'size': [64 , 64]} ,
-	2: {'adress': "Character2.png" , 'size': [64 , 64] , 'states': ['idle' , 'death' , 'dash']} ,
+	2: {'adress': "Character2.png" , 'size': [64 , 64] , 'states': ['Idle' , 'Run' , 'Magic']} ,
+	3: {'adress': "Character3.png" , 'size': [96 , 32] , 'states': ['Idle' , 'Run' , 'Magic'] , 'active animations': {"Physic" : 'attack()',"Magic" : 'attack()'}} ,
 }
 
 # Images for Maps

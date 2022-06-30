@@ -11,6 +11,7 @@ from definitions import *
 from animations import Animations
 from moving_object import MovingObj
 from math import cos , sin
+import json
 
 
 class Character(Animations , MovingObj):
@@ -19,35 +20,68 @@ class Character(Animations , MovingObj):
 	"""
 
 	def __init__(self , images_idx = None , rect_to_be = screen_rect ,
-	             groups = None , pos = None , relative_pos = None):
+	             groups = None , pos = None , relative_pos = None , dict_with_images = CHARACTER_IMAGES_DICT):
 		"""
 
 		:param images_idx: image from the dictionary to get
 		:param groups: groups to add
 		"""
 		MovingObj.__init__(self)
-		self.default_height = random.randrange(160 , 210) / 100
-		self.default_width = random.randrange(30 , 60) / 100
-		Animations.__init__(self , images_idx = images_idx , area = [self.default_width , self.default_height] ,
-		                    dict_with_images = CHARACTER_IMAGES_DICT , rect_to_be = rect_to_be , pos = pos ,
-		                    relative_pos = relative_pos , groups = groups)
-		sight = [5 , 10]
+		self.images_idx = images_idx
+		loaded_dict = self.load_character()
+		if loaded_dict:
+			self.default_width = float(loaded_dict.get('default_width'))
+			self.default_height = float(loaded_dict.get('default_height'))
+			self.images_idx = float(loaded_dict.get('images_idx'))
+			self.default_strength = float(loaded_dict.get('default_strength'))
+			self.default_resilience = float(loaded_dict.get('default_resilience'))
+			self.default_sight_meters = float(loaded_dict.get('default_sight_meters'))
+			self.sex = loaded_dict.get('sex')
+			self.default_mana = float(loaded_dict.get('default_mana'))
+			self.default_hp = float(loaded_dict.get('default_hp'))
+			self.default_velocity = float(loaded_dict.get('default_velocity'))
+			self.default_time = float(loaded_dict.get('default_time'))
+			self.default_will = float(loaded_dict.get('default_will'))
+			self.default_wisdom = float(loaded_dict.get('default_wisdom'))
+			self.default_melee_dist = float(loaded_dict.get('default_melee_dist'))
+			self.level = float(loaded_dict.get('level'))
+			self.bag = loaded_dict.get('bag')
+			self.equipments = loaded_dict.get('equipments')
+			self.dominant_hand = loaded_dict.get('dominant_hand')
+			self.other_hand = loaded_dict.get('other_hand')
+			self.proportion_time_velocity = loaded_dict.get('proportion_time_velocity')
+			self.effects = loaded_dict.get('effects')
+			self.abnormal_effects = loaded_dict.get('abnormal_effects')
+			rect_center = loaded_dict.get('rect_center')
+			print(self.default_width , 'width')
+			Animations.__init__(self , images_idx = self.images_idx , area = [self.default_width , self.default_height] ,
+			                    dict_with_images = dict_with_images , rect_to_be = rect_to_be , pos = pos ,
+			                    groups = groups)
+			self.rect.center = rect_center
 
-		# default values for this character
-		self.default_strength = 5  # default physical attack
-		self.default_resilience = 5  # default physical resilience
-		self.default_sight_meters = random.randrange(sight[0] , sight[1])
-		self.sex = random.choice(["Male" , "Female"])
-		if self.sex == "Female":
-			self.default_sight_meters *= .9
-			self.default_height -= (random.randrange(0 , 10) / 100)
-		self.default_mana = 10
-		self.default_hp = 10
-		self.default_velocity = 5
-		self.default_time = 10000
-		self.default_will = 5  # default magical attack and how strong controls mana
-		self.default_wisdom = 5  # default magical resilience
-		self.default_melee_dist = self.default_height
+		else:
+			self.default_height = random.randrange(160 , 210) / 100
+			self.default_width = random.randrange(30 , 60) / 100
+			Animations.__init__(self , images_idx = self.images_idx , area = [self.default_width , self.default_height] ,
+			                    dict_with_images = dict_with_images , rect_to_be = rect_to_be , pos = pos ,
+			                    relative_pos = relative_pos , groups = groups)
+			sight = [5 , 10]
+
+			# default values for this character
+			self.default_strength = 5  # default physical attack
+			self.default_resilience = 5  # default physical resilience
+			self.default_sight_meters = random.randrange(sight[0] , sight[1])
+			self.sex = random.choice(["Male" , "Female"])
+			if self.sex == "Female":
+				self.default_sight_meters *= .9
+				self.default_height -= (random.randrange(0 , 10) / 100)
+			self.default_mana = 10
+			self.default_hp = 10
+			self.default_velocity = 5
+			self.default_time = 10000
+			self.default_will = 5  # default magical attack and how strong controls mana
+			self.default_wisdom = 5  # default magical resilience
+			self.default_melee_dist = self.default_height/2
 
 		# changed status
 		self.strength = self.default_strength
@@ -86,18 +120,51 @@ class Character(Animations , MovingObj):
 		self.proportion_time_velocity = .2
 		self.effects = []
 		self.abnormal_effects = {}
+		self.next_action = []
 		self.calc_status()
 		self.change_sizes_proportion()
 		self.to_move_point = pg.Vector2(self.rect.center)
 
 
-		# quests
-		self.quests = set()
-		self.to_kill_quest = set()
-		self.to_place_quest = set()
-		self.to_retrieve_quest = set()
-		self.to_collect_quest = set()
-		self.to_NPC_quest = set()
+	# Administration of the character
+
+	def save_character(self):
+		new_dict = {
+			'default_height': self.default_height,
+			'default_width': self.default_width,
+			'images_idx': self.images_idx ,
+			'default_strength': self.default_strength ,
+			'default_resilience': self.default_resilience ,
+			'default_sight_meters': self.default_sight_meters ,
+			'sex': self.sex ,
+			'default_mana': self.default_mana ,
+			'default_hp': self.default_hp ,
+			'default_velocity': self.default_velocity ,
+			'default_time': self.default_time ,
+			'default_will': self.default_will ,
+			'default_wisdom': self.default_wisdom ,
+			'default_melee_dist': self.default_melee_dist ,
+			'level': self.level ,
+			'bag': self.bag ,
+			'equipments': self.equipments ,
+			'dominant_hand': self.dominant_hand ,
+			'other_hand': self.other_hand ,
+			'proportion_time_velocity': self.proportion_time_velocity,
+			'effects': self.effects,
+			'abnormal_effects': self.abnormal_effects,
+			'rect_center': self.rect.center,
+		}
+		with open(f'./DataInfo/character{self.images_idx}.json' , 'w') as file:
+			json.dump(new_dict , file)
+
+	def load_character(self):
+		try:
+			with open(f'./DataInfo/character{self.images_idx}.json' , 'r') as file:
+				new_dict = json.load(file)
+				return new_dict
+		except FileNotFoundError:
+			print('Nenhum arquivo. Vou fechar e vc se vira...')
+			return {}
 
 	### Change things for the game
 
@@ -120,7 +187,6 @@ class Character(Animations , MovingObj):
 		:return: None
 		"""
 		Animations.draw(self , screen_to_draw)
-		# pg.draw.circle(screen_to_draw , 'green' , self.to_move_point , 40)
 
 	def update(self , **kwargs):
 		"""
@@ -128,10 +194,21 @@ class Character(Animations , MovingObj):
 		:param **kwargs:
 		:return: None
 		"""
-		Animations.update(self , self.velocity)
 		MovingObj.update(self)
+		Animations.update(self , self.velocity)
 
 
+		# do the next action
+		if self.next_action and self.image_index[1] in [0]:
+			kind = self.next_action[0][0].get_kind()
+			self.change_state(kind)
+
+		# check if it stopped moving
+		if self.states_names[self.image_index[1]] in ['Run']:
+			x , y = self.moving_velocity
+			x , y = abs(x) , abs(y)
+			if x < 1 and y <1:
+				self.change_state()
 
 		# check hp
 		if self.hp <= (0 - self.will // 10):
@@ -337,19 +414,32 @@ class Character(Animations , MovingObj):
 
 	# actions
 
-	def move_card(self , meters):
+	def set_action(self , card , pos):
+		"""
+		set the next action to take
+		:param card:
+		:return:
+		"""
+		self.next_action.append([card , pos])
+
+	def move_card(self , meters , pos = None):
 		"""
 		not ready yet, it will move the players up to that many meters
 		:param meters: size in meters
 		:return: None
 		"""
-		mouse_pos = pg.Vector2(pg.mouse.get_pos()) # the position of the mouse
-		max_dist = calc_proportional_size(meters) # max distance to travel
-		if mouse_pos.distance_to(self.rect.center) <= max_dist:
-			self.to_move_point = mouse_pos
+		if pos is None:
+			pos = pg.Vector2(pg.mouse.get_pos()) # the position of the mouse
 		else:
-			ang = get_ang(self.rect.center , mouse_pos)
+			pos = pg.Vector2(calc_proportional_size(pos))+self.rect.center
+		max_dist = calc_proportional_size(meters) # max distance to travel
+		if pos.distance_to(self.rect.center) <= max_dist:
+			self.to_move_point = pos
+		else:
+			ang = get_ang(self.rect.center , pos)
 			self.to_move_point = pg.Vector2(max_dist*cos(ang) , max_dist*sin(ang))+self.rect.center
+		self.change_state('Run')
+		self.next_action.clear()
 
 	def calc_acceleration(self):
 		return
@@ -363,11 +453,10 @@ class Character(Animations , MovingObj):
 		real_vel = min([vel , max_vel])
 		self.moving_velocity = pg.Vector2([(real_vel*cos(ang)) , (real_vel*sin(ang))])
 
-	def physical_attack(self , power):
-		pass
-
-	def magic_attack(self , power):
-		pass
+	def attack(self):
+		card , pos = self.next_action[0]
+		card.do_action(pos)
+		self.next_action.pop(0)
 
 	def calc_status(self):
 		"""
@@ -650,7 +739,7 @@ class Character(Animations , MovingObj):
 			value = min([0 , value - self.wisdom - random.randint(self.will)])
 		self.change_hp(value)
 
-	def physical_damage(self , value: int = -2):
+	def physic_damage(self , value: int = -2):
 		"""
 		Deals physical damage to this character. Change if needed.
 		:param value:
@@ -672,81 +761,29 @@ class Character(Animations , MovingObj):
 
 	# Feels the world
 
-	def feel_world(self , size , kind):
+	def feel_world(self , size , kind , pos = None):
 		"""
 		this will discover the world around the player
 		:param size: the area, in meters, of the effect
 		:param kind: the type sensation the player will use to discover the things
 		:return: None
 		"""
-		pos = pg.mouse.get_pos()
+		if pos is None:
+			pos = pg.mouse.get_pos()
 		for current_map in maps_group:
 			for obj in current_map.get_secrets():
+
 				if type(size) in (int , float):
 						pos = pg.Vector2(pos)
 						if pos.distance_to(obj.rect.center) <= size:
 							if obj.check_discover(kind):
-								obj.discover()
+								obj.find_me()
 				elif type(size) in [list , tuple] and len(size) == 2:
 						effect_rect = pg.Rect((0 , 0) , size)
 						effect_rect.center = pos
 						if obj.rect.colliderect(effect_rect):
 							if obj.check_discover(kind):
-								obj.discover()
-
-	# Administration of the character
-
-	def calc_new_size(self):
-		"""
-		Calculate the new size of the max_rect, to look proportional to the map
-		:return:
-		"""
-		self.rect = pg.Rect((0 , 0) , calc_proportional_size((self.width , self.height)))
-
-	def save_player(self):
-		new_dict = {
-			'images_idx': self.images_idx ,
-			'default_strength': self.default_strength ,
-			'default_resilience': self.default_resilience ,
-			'default_height': self.default_height ,
-			'default_sight_meters': self.default_sight_meters ,
-			'sex': self.sex ,
-			'default_mana': self.default_mana ,
-			'default_hp': self.default_hp ,
-			'default_velocity': self.default_velocity ,
-			'default_time': self.default_time ,
-			'default_will': self.default_will ,
-			'default_wisdom': self.default_wisdom ,
-			'default_melee_dist': self.default_melee_dist ,
-			'level': self.level ,
-			'bag': self.bag ,
-			'equipments': self.equipments ,
-			'dominant_hand': self.dominant_hand ,
-			'other_hand': self.other_hand ,
-		}
-		return new_dict
-
-	def load_player(self , new_dict):
-		self.images_idx = new_dict.get('images_idx')
-		self.default_strength = new_dict.get('default_strength')
-		self.default_resilience = new_dict.get('default_resilience')
-		self.default_height = new_dict.get('default_height')
-		self.default_sight_meters = new_dict.get('default_sight_meters')
-		self.sex = new_dict.get('sex')
-		self.default_mana = new_dict.get('default_mana')
-		self.default_hp = new_dict.get('default_hp')
-		self.default_velocity = new_dict.get('default_velocity')
-		self.default_time = new_dict.get('default_time')
-		self.default_will = new_dict.get('default_will')
-		self.default_wisdom = new_dict.get('default_wisdom')
-		self.default_melee_dist = new_dict.get('default_melee_dist')
-		self.level = new_dict.get('level')
-		self.bag = new_dict.get('bag')
-		self.equipments = new_dict.get('equipments')
-		self.dominant_hand = new_dict.get('dominant_hand')
-		self.other_hand = new_dict.get('other_hand')
-		self.calc_status()
-		self.change_sizes_proportion()
+								obj.find_me()
 
 def get_ang(p1 , p2):
 	"""

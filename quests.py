@@ -1,6 +1,7 @@
 from definitions import *
 from quests_info import QUEST_DICT
 from variables import *
+from pygame.sprite import GroupSingle , Group
 
 class Quest:
 	"""
@@ -17,7 +18,10 @@ class Quest:
 		if groups is None:
 			groups = []
 		for group in groups:
-			group.add(self)
+			if type(group) == list:
+				group.append(self)
+			if type(group) in [set , Group , GroupSingle]:
+				group.add(self)
 		self.groups = groups
 		self.player = player
 		self.quest_index = quest_index
