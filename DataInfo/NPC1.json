@@ -1,9 +1,0 @@
-{
-  "images_idx": 3.0, "default_strength": 5.0, "default_resilience": 5.0, "default_height": 1.71, "default_width": 0.33,
-  "default_sight_meters": 7.2, "sex": "Female", "default_mana": 10.0, "default_hp": 10.0, "default_velocity": 5.0,
-  "default_time": 10008.0, "default_will": 5.0, "default_wisdom": 5.0, "default_melee_dist": 0.855, "level": 1,
-  "bag": {}, "equipments": {"head": null, "r_hand": null, "l_hand": null, "chest": null, "legs": null, "feets": null,
-  "r_finger": null, "l_finger": null, "neck": null}, "dominant_hand": "r_hand", "other_hand": "l_hand",
-  "proportion_time_velocity": 0.2, "effects": [], "abnormal_effects": {}, "rect_center": [75, 355],
-  "quests_to_give": [], "given_quests": [], "disposition": []
-}
