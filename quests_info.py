@@ -9,14 +9,25 @@ QUEST_KIND = [ # kind # exemple of goal
 ]
 
 QUEST_DICT = {
+	#   'Name': the name of the quest
+	# 	'Description': a little text of what the player have to do
+	# 	'Card_reward': the index or list of indexes of the card the player will get when completing the quest
+	#   'Item_reward': the index or list of indexes of the items the player will get when completing the quest
+	# 	'Kind': from QUEST_KIND, will tell how this quest will work.
+	# 	'Goals': the goal, or a list of goal needed for complete the quest
+	# 	'Chain_quest': it will reward a next quest, so that, when this is over, generates another
+	# 	'Marks_reward': []
 	1:{
-		'name': 'Tutorial',
+		'Name': 'Tutorial',
 		'Description': 'Find the door and exit',
 		'Card_reward': 2,
 		'Kind': 'Collect',
 		'Goals': [[1,3]]*5,
-		'Chain_quest': True
+		'Chain_quest': True,
+		'Marks_reward': [1]
 	},
+
+
 	1.1: {
 		'name': 'Tutorial2',
 		'Description': 'Find the door and exit',
@@ -25,4 +36,9 @@ QUEST_DICT = {
 		'Goals': [[2 , 3] , [1,5]],
 
 	},
+}
+
+
+QUEST_MARKS = {
+	1: 'TUTORIAL COMPLETE',
 }

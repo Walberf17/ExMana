@@ -40,9 +40,3 @@ NPCS_KIND_DICT = { # NPC_idx : the kinds it gets
 	3: [YOUNG_MEN]
 }
 
-NPCS_INFO_DICT = {
-	1 : { # default NPC, a copy of the player
-	'kind': [1]
-	}
-}
-

@@ -53,7 +53,6 @@ class Character(Animations , MovingObj):
 			self.effects = loaded_dict.get('effects')
 			self.abnormal_effects = loaded_dict.get('abnormal_effects')
 			rect_center = loaded_dict.get('rect_center')
-			print(self.default_width , 'width')
 			Animations.__init__(self , images_idx = self.images_idx , area = [self.default_width , self.default_height] ,
 			                    dict_with_images = dict_with_images , rect_to_be = rect_to_be , pos = pos ,
 			                    groups = groups)

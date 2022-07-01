@@ -18,6 +18,7 @@ class Player(Character):
 		self.to_retrieve_quest = loaded_dict.get('to_retrieve_quest' , list())
 		self.to_collect_quest = loaded_dict.get('to_collect_quest' , list())
 		self.to_NPC_quest = loaded_dict.get('to_NPC_quest' , list())
+		self.marks = loaded_dict.get('marks' , list())
 
 	def set_deck(self , deck = None , adventure = None):
 		"""
@@ -219,13 +220,14 @@ class Player(Character):
 			'to_retrieve_quest' :       self.to_retrieve_quest,
 			'to_collect_quest' :        self.to_collect_quest,
 			'to_NPC_quest' :            self.to_NPC_quest,
+			'marks' :                   self.marks,
 		}
-		with open(f'./DataInfo/player1.json' , 'w') as file:
+		with open(f'./DataInfo/Players/player1.json' , 'w') as file:
 			json.dump(new_dict , file)
 
 	def load_character(self):
 		try:
-			with open(f'./DataInfo/player1.json' , 'r') as file:
+			with open(f'./DataInfo/Players/player1.json' , 'r') as file:
 				new_dict = json.load(file)
 				return new_dict
 		except FileNotFoundError:

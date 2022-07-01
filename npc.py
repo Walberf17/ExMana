@@ -54,12 +54,12 @@ class NPC(Character):
 			'disposition': self.disposition,
 		}
 
-		with open(f'./DataInfo/NPC{self.npc_idx}.json' , 'w') as file:
-			json.dump(new_dict , file)
+		with open(f'./DataInfo/NPCs/NPC{self.npc_idx}.json' , 'w') as file:
+			json.dump(new_dict , file , indent = 4)
 
 	def load_character(self):
 		try:
-			with open(f'./DataInfo/NPC{self.npc_idx}.json' , 'r') as file:
+			with open(f'./DataInfo/NPCs/NPC{self.npc_idx}.json' , 'r') as file:
 				new_dict = json.load(file)
 				return new_dict
 		except FileNotFoundError:
