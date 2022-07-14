@@ -23,7 +23,7 @@ class TextBox(Sprite):
 	param bg_color : pg.color
 	"""
 
-	def __init__(self , text , rect , rect_to_be, centered_x = True , centered_y = False, font = None , font_color = "white" ,bg_color = "black" , groups = None):
+	def __init__(self , text , rect , rect_to_be, centered_x = True , centered_y = False, font = None , font_color = "white" , bg_color = "black" , groups = None):
 		"""
 		It takes a string, a pg.Rect , a pg.font,
 		font color and a background color.

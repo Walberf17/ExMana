@@ -19,13 +19,14 @@ YOUNG_MEN = [
 	'Calor!',
 	'Cara, deu fome...',
 	'Ah...',
+	'Eu era um aventureiro, assim como você, mas levei uma flechada no ombro...',
 ]
 
 CHILDREN = [
 	"Oi, senhor!",
 	"Mim dá isso?",
 	"Você é velho?",
-	"Quer bricar?",
+	"Quer brincar?",
 	"O Jorge não mandou o video lá?",
 	"Ontem a mulher das vacinas falou que eu vou ficar forte se eu tomar as vacinas!",
 	"Bom dia!",

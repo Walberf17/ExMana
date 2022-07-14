@@ -16,15 +16,22 @@ QUEST_DICT = {
 	# 	'Kind': from QUEST_KIND, will tell how this quest will work.
 	# 	'Goals': the goal, or a list of goal needed for complete the quest
 	# 	'Chain_quest': it will reward a next quest, so that, when this is over, generates another
-	# 	'Marks_reward': []
+	# 	'Marks_reward': list of marks the player will get when the quest is over
+	#   'Requirements': list of marks to get the quest
+	#   'Talk_text': the text in the begining of the quest
+	#   'Ending_text': the talk at the end of the quest
+
 	1:{
 		'Name': 'Tutorial',
-		'Description': 'Find the door and exit',
+		'Description': 'Find the NPC who talked to you and talk again',
 		'Card_reward': 2,
-		'Kind': 'Collect',
-		'Goals': [[1,3]]*5,
-		'Chain_quest': True,
-		'Marks_reward': [1]
+		'Kind': 'NPC',
+		'Goals': 1,
+		'Chain_quest': False,
+		'Marks_reward': [1],
+		'Talk_text': 'Então, essa é a quest, vc vai ter de se virar pra fazer isso',
+		'Ending_text': 'Você finalmente chegou ao final da bagaça, então é isso.'
+
 	},
 
 

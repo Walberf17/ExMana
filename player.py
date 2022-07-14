@@ -1,5 +1,4 @@
 from quests_info import QUEST_DICT
-from variables import *
 from definitions import *
 import pygame as pg
 from characters import Character
@@ -12,12 +11,16 @@ class Player(Character):
 	def __init__(self , *args , **kwargs):
 		super().__init__(*args , **kwargs)
 		loaded_dict = self.load_character()
-		self.quests = loaded_dict.get('quests' , list())
-		self.to_kill_quest = loaded_dict.get('to_kill_quest' , list())
-		self.to_place_quest = loaded_dict.get('to_place_quest' , list())
-		self.to_retrieve_quest = loaded_dict.get('to_retrieve_quest' , list())
-		self.to_collect_quest = loaded_dict.get('to_collect_quest' , list())
-		self.to_NPC_quest = loaded_dict.get('to_NPC_quest' , list())
+		self.quests = set()
+		self.to_kill_quest = set()
+		self.to_place_quest = set()
+		self.to_retrieve_quest = set()
+		self.to_collect_quest = set()
+		self.to_NPC_quest = set()
+		self.quests_indexes = []
+		self.completed_quests_indexes = loaded_dict.get('completed_quests_indexes' , list())
+		for idx in loaded_dict.get('quests_indexes' , list()):
+			self.give_quest(idx)
 		self.marks = loaded_dict.get('marks' , list())
 
 	def set_deck(self , deck = None , adventure = None):
@@ -53,12 +56,28 @@ class Player(Character):
 		init_y = self.rect.top + (h * j)
 		return pg.Rect(init_x , init_y , w , h)
 
+	def can_get_quest(self , idx):
+		"""
+		check if the player can get the quest
+		:param idx: Index of the quest in the QUEST_DICT.
+		:return: Boolean, True if it can get the quest.
+		"""
+		this_quest_dict = QUEST_DICT.get(idx)
+		requirements = set(this_quest_dict.get('Requirements' , set()))
+
+		if requirements:
+			print('tem requerimentos')
+			return requirements.issubset(self.get_marks())
+		return True
+
 	def give_quest(self , idx):
 		"""
 		Set a new quest for itself.
 		:param idx:
 		:return:
 		"""
+		if idx in self.quests_indexes:
+			return
 		kind = QUEST_DICT.get(idx).get('Kind')
 		groups = []
 		groups.append(self.quests)
@@ -69,6 +88,9 @@ class Player(Character):
 			'Collect': self.to_collect_quest ,
 			'Kill': self.to_kill_quest ,
 		}
+
+		self.quests_indexes.append(idx)
+
 		groups.append(kind_dict.get(kind , []))
 		Quest(quest_index = idx , groups = groups , player = self)
 
@@ -90,6 +112,8 @@ class Player(Character):
 			self.time_hud.h = screen_rect.h * dtime
 			self.time_hud.bottomright = screen_rect.bottomright
 
+
+	# draw things and
 	def draw_range(self , screen_to_draw , meele = True):
 		"""
 		Draw a circle for the given range of the attack
@@ -136,6 +160,8 @@ class Player(Character):
 		pg.draw.rect(screen_to_draw , "red" , new_rect , 4)
 		screen_to_draw.blit(image , new_rect , new_clamp_rect)
 
+
+	# check and use cards
 	def check_in_range(self , melee):
 		center = pg.Vector2(self.rect.center)
 		dist = center.distance_to(pg.mouse.get_pos())
@@ -165,6 +191,11 @@ class Player(Character):
 			self.mana -= mana_cost
 
 	def get_multiplier(self , card):
+		"""
+		Return a multiplier to the calc of the size fo the effects.
+		:param card:
+		:return:
+		"""
 		if type(card) not in [list , tuple]:
 			card = [card , 0]
 		multiplier = 1
@@ -190,6 +221,26 @@ class Player(Character):
 					if obj.rect.colliderect(effect_rect):
 						obj.get_me(self.main_deck)
 
+	def check_hit_object(self , obj , pos , size):
+		"""
+		check if the obj is hit by the size of this effect
+		:param obj: a object that has a rect parameter
+		:param size: a list of sizes in pixels
+		:param pos: the center of the effect
+		:return: boolean, True if hit by the effect
+		"""
+		center = pg.Vector2(pos)
+		if type(size) in (int , float):
+			if center.distance_to(obj.rect.center) <= size:
+				return True
+		elif type(size) in [list , tuple] and len(size) == 2:
+			effect_rect = pg.Rect((0 , 0) , size)
+			effect_rect.center = center
+			if obj.rect.colliderect(effect_rect):
+				return True
+		return False
+
+	# Manage the character
 	def save_character(self):
 		new_dict = {
 			'images_idx':               self.images_idx ,
@@ -214,18 +265,19 @@ class Player(Character):
 			'proportion_time_velocity': self.proportion_time_velocity,
 			'effects':                  self.effects,
 			'abnormal_effects':         self.abnormal_effects,
-			'quests' :                  self.quests,
-			'to_kill_quest' :           self.to_kill_quest,
-			'to_place_quest' :          self.to_place_quest,
-			'to_retrieve_quest' :       self.to_retrieve_quest,
-			'to_collect_quest' :        self.to_collect_quest,
-			'to_NPC_quest' :            self.to_NPC_quest,
+			'quests_indexes' :          self.quests_indexes,
+			'completed_quests_indexes': self.completed_quests_indexes,
 			'marks' :                   self.marks,
-		}
+			'rect_center':              self.rect.center ,
+}
 		with open(f'./DataInfo/Players/player1.json' , 'w') as file:
 			json.dump(new_dict , file)
 
 	def load_character(self):
+		"""
+		get a dictionary saved in the correct folder of this character.
+		:return:
+		"""
 		try:
 			with open(f'./DataInfo/Players/player1.json' , 'r') as file:
 				new_dict = json.load(file)
@@ -233,3 +285,49 @@ class Player(Character):
 		except FileNotFoundError:
 			print('Nenhum arquivo. Vou fechar e vc se vira...')
 			return {}
+
+	def get_marks(self):
+		"""
+		Return a set with the marks the player has
+		:return: set()
+		"""
+		return set(self.marks)
+
+	# interactions
+	def interact(self , pos , size):
+		"""
+		check if it can interact with something, then interact with it.
+		:param size: the size of the effect, in pixels
+		:param pos: list with the [x,y] pos in the screen.
+		:return:
+		"""
+		obj = self.check_interaction_group(pos , size , [characters_group , items_group])
+		if obj:
+			obj.interact_with(self)
+
+	def check_interaction_group(self , pos , size , groups):
+		"""
+		check if a obj in a group is in that position, and return the first object in the loop.
+		:param pos: list with the [x,y] pos in the screen.
+		:param size: the size of the effect, in pixels
+		:param groups: list of groups to check, put in order.
+		:return: the FIRST object that it hits.
+		"""
+		for group in groups:
+			print(f'trying this group: {group}')
+			for obj in group:
+				if self.check_hit_object(obj , pos=pos , size=size):
+					return obj
+		return False
+
+	# for creating player
+	def click_up(self , event):
+		"""
+		Saves the character when clicked with the right mouse button.
+		:param event:
+		:return:
+		"""
+		if event.button == 3:
+			self.save_character()
+		print(self.quests_indexes)
+		super().click_up(event)

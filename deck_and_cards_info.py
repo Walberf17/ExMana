@@ -5,6 +5,21 @@
 
 # Cards
 
+EFFECTS_KINDS = [
+	'Interact',
+	'Get',
+	'Fire',
+	'Ice',
+	'Poison',
+	'Move',
+	'Smell' ,
+	'Taste' ,
+	'Sight' ,
+	'Search' ,
+	'Thoughtful Search' ,
+]
+
+
 CARDS_DICT = {
 	# 1:{
 	# 'name': 'cool name for the card',
@@ -80,5 +95,11 @@ CARDS_DICT = {
 		'melee': True ,
 		'kind': 'Physic',
 	} ,
-
+	9: {
+		'name': 'Interagir' ,
+		'active_effects': [["Interact" , 'interact(pos , size)' , 0 , .5]] ,
+		'cost': 1 ,
+		'melee': True ,
+		'kind': 'Interact',
+	} ,
 }

@@ -9,7 +9,7 @@ from animations import Animations
 from moving_object import MovingObj
 from pygame.sprite import Sprite
 
-class MapObject(MovingObj , Animations):
+class ItemsInGame(MovingObj , Animations):
 	def __init__(self , item_idx = None , pos = None  , groups = None):
 		this_dict = ITEMS_INFO_DICT.get(item_idx)
 		area = this_dict.get("size")
@@ -80,3 +80,6 @@ class MapObject(MovingObj , Animations):
 				deck = player.get_deck()
 		deck.new_card(self.card_idx)
 		self.kill()
+
+	def interact(self , player):
+		return False

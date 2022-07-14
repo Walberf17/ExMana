@@ -56,7 +56,8 @@ class Character(Animations , MovingObj):
 			Animations.__init__(self , images_idx = self.images_idx , area = [self.default_width , self.default_height] ,
 			                    dict_with_images = dict_with_images , rect_to_be = rect_to_be , pos = pos ,
 			                    groups = groups)
-			self.rect.center = rect_center
+			if rect_center is not None:
+				self.rect.center = rect_center
 
 		else:
 			self.default_height = random.randrange(160 , 210) / 100
@@ -157,6 +158,10 @@ class Character(Animations , MovingObj):
 			json.dump(new_dict , file)
 
 	def load_character(self):
+		"""
+		get a dictionary saved in the correct folder of this character.
+		:return:
+		"""
 		try:
 			with open(f'./DataInfo/character{self.images_idx}.json' , 'r') as file:
 				new_dict = json.load(file)

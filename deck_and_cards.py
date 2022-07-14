@@ -207,19 +207,37 @@ class Card(Animations , MovingObj):
 				size = [size[0]*multiplier , size[1] * multiplier]
 			else:
 				size *= multiplier
-			if kind in ["Smell" , "Taste" , "Sight" , "Search" , "Throughtful Search" , 'Get' , 'Move']:
+
+			# go through all the kinds of the effect
+			# if effect is to do a action of the player on the area hit
+			if kind in ["Smell" , "Taste" , "Sight" , "Search" , "Thorough Search" , 'Get' , 'Move' , 'Interact']:
 				eval(f'self.player.{effect}')
+
+
+			# other effects
 			else:
-				center = pg.Vector2(pos)
 				for character in characters_group:
-					if type(size) in (int , float):
-							if center.distance_to(character.rect.center) <= size:
-								character.add_effects(kind , effect , duration)
-					elif type(size) in [list , tuple] and len(size) == 2:
-							effect_rect = pg.Rect((0,0) , calc_proportional_size(size))
-							effect_rect.center = center
-							if character.rect.colliderect(effect_rect):
-								character.add_effects(kind , effect , duration)
+					if self.check_hit_range(character , size , pos)		:
+						character.add_effects(kind , effect , duration)
+
+	def check_hit_range(self , obj , size , pos):
+		"""
+		check if the obj is hit by the size of this effect
+		:param obj: a object that has a rect parameter
+		:param size: a list of sizes in pixels
+		:param pos: the center of the effect
+		:return: boolean, True if hit by the effect
+		"""
+		center = pg.Vector2(pos)
+		if type(size) in (int , float):
+			if center.distance_to(obj.rect.center) <= size:
+				return True
+		elif type(size) in [list , tuple] and len(size) == 2:
+			effect_rect = pg.Rect((0 , 0) , size)
+			effect_rect.center = center
+			if obj.rect.colliderect(effect_rect):
+				return True
+		return False
 
 	def do_map_effects(self , pos):
 		for current_map in maps_group:

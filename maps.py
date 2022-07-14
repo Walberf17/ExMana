@@ -8,7 +8,7 @@ from maps_info import *
 from variables import *
 from definitions import *
 from effects import Effect
-from items_in_game import MapObject
+from items_in_game import ItemsInGame
 from pygame.sprite import Sprite , Group
 from animations import Animations
 from moving_object import MovingObj
@@ -41,7 +41,7 @@ class Maps(Animations , MovingObj):
 
 	def create_secrets(self , secrets_list):
 		for item_idx , pos in secrets_list:
-			MapObject(pos = pos , item_idx = item_idx , groups = [self.secrets , items_group])
+			ItemsInGame(pos = pos , item_idx = item_idx , groups = [self.secrets , items_group])
 
 	def draw(self , screen_to_draw):
 		"""

@@ -51,7 +51,7 @@ IMAGES_PATH = './Images/'
 
 scene_test_dict = {
 	"draw": [maps_group , text_boxes_group , monsters_group , selection_group , players_group ,
-	         cards_group , items_group , buttons_group , pointer_group , decks_group] ,
+	         cards_group , items_group , buttons_group , pointer_group , decks_group , characters_group] ,
 	"click_down": [buttons_group , selection_group , players_group , decks_group , moving_objects_group] ,
 	"update": [buttons_group , maps_group , players_group , selection_group , moving_objects_group] ,
 	"move": [buttons_group , players_group, selection_group , moving_objects_group]

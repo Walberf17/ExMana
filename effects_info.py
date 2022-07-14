@@ -18,7 +18,7 @@ MAP_EFFECTS = {
 	"Taste" : {"color": "green" , "effect": []},
 	"Sight" : {"color": "green" , "effect": []},
 	"Search" : {"color": "green" , "effect": []},
-	"Throughtful Search": {"color": "green" , "effect": []},
+	"Thorough Search": {"color": "green" , "effect": []},
 
 
 }
@@ -51,7 +51,7 @@ EFFECTS_AND_DAMAGE_INFO = [
 	"feel_taste" , # usual args = (pos , area)
 	"feel_sight" , # usual args = (pos , area)
 	"search" , # usual args = (pos , area)
-	"throughtful_search" , # usual args = (pos , area)
+	"thorough_search" , # usual args = (pos , area)
 	"move_card" , # usual args = (value)
 	"get_item", # usual args = (self.rect , size)
 
