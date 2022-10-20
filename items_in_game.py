@@ -16,7 +16,7 @@ class ItemsInGame(MovingObj , Animations):
 		clues = this_dict.get('clues')
 		card_idx = this_dict.get('card_idx')
 		Sprite.__init__(self , *groups)
-		Animations.__init__(self ,area = area , pos = pos , images_name = item_idx , dict_with_images =ITEMS_IMAGES_DICT , groups = groups)
+		Animations.__init__(self ,area = area , center = pos , image_name = item_idx , dict_with_images =ITEMS_IMAGES_DICT , groups = groups)
 		MovingObj.__init__(self)
 		self.discovered = False
 		if clues is None:

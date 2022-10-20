@@ -53,8 +53,8 @@ class Character(Animations , MovingObj):
 			self.effects = loaded_dict.get('effects')
 			self.abnormal_effects = loaded_dict.get('abnormal_effects')
 			rect_center = loaded_dict.get('rect_center')
-			Animations.__init__(self , images_name = self.images_idx , area = [self.default_width , self.default_height] ,
-			                    dict_with_images = dict_with_images , rect_to_be = rect_to_be , pos = pos ,
+			Animations.__init__(self , image_name = self.images_idx , area = [self.default_width , self.default_height] ,
+			                    dict_with_images = dict_with_images , rect_to_be = rect_to_be , center = pos ,
 			                    groups = groups)
 			if rect_center is not None:
 				self.rect.center = rect_center
@@ -62,8 +62,8 @@ class Character(Animations , MovingObj):
 		else:
 			self.default_height = random.randrange(160 , 210) / 100
 			self.default_width = random.randrange(30 , 60) / 100
-			Animations.__init__(self , images_name = self.images_idx , area = [self.default_width , self.default_height] ,
-			                    dict_with_images = dict_with_images , rect_to_be = rect_to_be , pos = pos ,
+			Animations.__init__(self , image_name = self.images_idx , area = [self.default_width , self.default_height] ,
+			                    dict_with_images = dict_with_images , rect_to_be = rect_to_be , center = pos ,
 			                    relative_pos = relative_pos , groups = groups)
 			sight = [5 , 10]
 

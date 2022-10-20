@@ -133,7 +133,7 @@ class Card(Animations , MovingObj):
 	"""
 	def __init__(self, idx , deck , player , groups = None):
 		MovingObj.__init__(self)
-		Animations.__init__(self , images_name = idx , area = (1,1.4) , dict_with_images = CARDS_IMAGES , rect_to_be = screen_rect , pos = (random.randint( 1 , screen_rect.w) , screen_rect.h*.95) , groups = groups)
+		Animations.__init__(self , image_name = idx , area = (1,1.4) , dict_with_images = CARDS_IMAGES , rect_to_be = screen_rect , center = (random.randint( 0 , 1) , .95) , groups = groups)
 		this_dict = CARDS_DICT.get(idx)
 		if self.images:
 			self.close_up_image = pg.transform.scale(self.original_images , [self.rect.w * 3 , self.rect.h * 3])

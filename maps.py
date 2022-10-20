@@ -34,7 +34,7 @@ class Maps(Animations , MovingObj):
 		self.map_idx = idx_map
 		self.area , self.name = MAPS_INFO.get(idx_map)
 		change_map_proportion(self , rect_to_be)
-		Animations.__init__(self , images_name = idx_map , area = self.area , dict_with_images = MAPS_IMAGES_DICT , rect_to_be = rect_to_be , groups = groups)
+		Animations.__init__(self , image_name = idx_map , area = self.area , dict_with_images = MAPS_IMAGES_DICT , rect_to_be = rect_to_be , groups = groups)
 		self.secrets = Group()
 		self.effects = Group()
 		self.create_secrets(secrets_list = secrets_list)

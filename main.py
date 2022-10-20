@@ -54,7 +54,7 @@ n = NPC(images_idx = 3 , groups = [characters_group] , rect_to_be = map_rect , r
 p1 = Player(images_idx = 3 , groups = [players_group] , rect_to_be = map_rect , relative_pos = [1.5 , .5])
 deck_test = Deck([1,2,3]*41, (0*screen_rect.w,.5*screen_rect.h,.1*screen_rect.w,.1*screen_rect.h) , hand_map , map_rect , p1)
 p1.set_deck(deck = deck_test)
-# p1.change_state('Run')
+# p1.change_state('Death')
 
 
 # create objects

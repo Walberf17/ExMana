@@ -32,7 +32,7 @@ class Effect(Animations , MovingObj):
 		if area is None:
 			area = [1 , 1]
 		self.name = idx_effect
-		Animations.__init__(self , images_name = self.name , color = MAP_EFFECTS[idx_effect]['color'] , area = area , dict_with_images = EFFECT_DICT , rect_to_be = rect_to_be , pos = pos , groups = groups)
+		Animations.__init__(self , image_name = self.name , color = MAP_EFFECTS[idx_effect]['color'] , area = area , dict_with_images = EFFECT_DICT , rect_to_be = rect_to_be , absolute_pos = pos , groups = groups)
 		self.duration = duration
 		if action is None:
 			action = EFFECT_INFO.get(self.name)
