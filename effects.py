@@ -3,7 +3,7 @@ Create and manage effects in the field.
 """
 import random
 from animations import Animations
-from images_info import EFFECT_DICT
+from animations_info import EFFECT_DICT
 from variables import *
 from definitions import *
 from pygame.sprite import Sprite
@@ -32,10 +32,10 @@ class Effect(Animations , MovingObj):
 		if area is None:
 			area = [1 , 1]
 		self.name = idx_effect
-		Animations.__init__(self , images_idx = self.name , color = MAP_EFFECTS[idx_effect]['color'] , area = area , dict_with_images = EFFECT_DICT , rect_to_be = rect_to_be , pos = pos , groups = groups)
+		Animations.__init__(self , images_name = self.name , color = MAP_EFFECTS[idx_effect]['color'] , area = area , dict_with_images = EFFECT_DICT , rect_to_be = rect_to_be , pos = pos , groups = groups)
 		self.duration = duration
 		if action is None:
-			action = EFFECT_INFO.get(self.images_idx)
+			action = EFFECT_INFO.get(self.name)
 		self.action = action
 		self.image_index = [0 , 0]
 		if self.images:

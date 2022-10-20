@@ -15,6 +15,7 @@ EFFECTS_KINDS = [
 	'Smell' ,
 	'Taste' ,
 	'Sight' ,
+	'Feel' ,
 	'Search' ,
 	'Thoughtful Search' ,
 ]
@@ -35,17 +36,16 @@ CARDS_DICT = {
 	1: {
 		"name": 'Descanse em Paz' ,
 		'active_effects': [['Get' , "get_item(size)" , 0 , .5]] ,
-		'map_effect': [['Fire' , 'fire_damage(-5)' , 1 , [2 , 2]]] ,
 		'cost': 15 ,
 		'melee': False ,
-		'kind': 'Physic'
 	} ,
+
 	2: {
 		'name': 'Cafungada Monstra' ,
 		'active_effects': [['Smell' , 'feel_world(size , kind)' , 0, 5]] ,
 		'cost': 5 ,
 		'melee': True ,
-		'kind': 'feel',
+		'kind': 'Feel',
 	} ,
 	3: {
 		'name': 'Assadura Grave' ,

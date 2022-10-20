@@ -1,7 +1,7 @@
 """
 This will work with the items in the game, that will be added in the map, and the players
 """
-from images_info import ITEMS_IMAGES_DICT
+from animations_info import ITEMS_IMAGES_DICT
 from items_info import *
 from variables import *
 from definitions import *
@@ -16,7 +16,7 @@ class ItemsInGame(MovingObj , Animations):
 		clues = this_dict.get('clues')
 		card_idx = this_dict.get('card_idx')
 		Sprite.__init__(self , *groups)
-		Animations.__init__(self ,area = area , pos = pos , images_idx = item_idx , dict_with_images =ITEMS_IMAGES_DICT , groups = groups)
+		Animations.__init__(self ,area = area , pos = pos , images_name = item_idx , dict_with_images =ITEMS_IMAGES_DICT , groups = groups)
 		MovingObj.__init__(self)
 		self.discovered = False
 		if clues is None:
@@ -25,6 +25,10 @@ class ItemsInGame(MovingObj , Animations):
 			clues = [clues]
 		self.card_idx = card_idx
 		self.clues = clues
+		self.can_be_taken = this_dict.get('take' , False)
+
+	def check_can_be_taken(self):
+		return (self.can_be_taken and self.discovered)
 
 	def check_discover(self , clues):
 		"""

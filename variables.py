@@ -1,4 +1,5 @@
 import pygame as pg
+import os
 
 ######## Initialize pygame
 pg.init()
@@ -45,7 +46,7 @@ SCENES = {"Main Menu": None ,
           "Testes": None}
 
 # for images in general
-IMAGES_PATH = './Images/'
+IMAGES_PATH = os.path.join("." , 'Images')
 
 ######## dicts and lists
 

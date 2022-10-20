@@ -19,6 +19,5 @@ POSSIBLE_CLUES = [
 ]
 
 ITEMS_INFO_DICT = {
-	'bread1' : {'size':[.5,.5] , 'clues' : ['Sight' , 'Smell'] , 'card_idx':2},
-
+	'bread1' : {'size':[.5,.5] , 'clues' : ['Sight' , 'Smell'] , 'card_idx':2 , 'take':True},
 }

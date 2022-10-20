@@ -157,8 +157,7 @@ class Scene:
 				if obj.finger_motion(event):
 					self.obj_clicked.add(obj)
 					return 
-	
-	
+
 	def finger_down_handler(self , event):
 		"""
 		Default finger down handler.
@@ -218,8 +217,6 @@ class Scene:
 				for obj in c_list:
 					if obj.finger_up(event):
 						return
-					
-	
 		
 	def click_down_handler(self , event):
 		"""
@@ -241,7 +238,8 @@ class Scene:
 		for c_list in self.to_click_down:
 			for obj in c_list:
 				if obj.click_down(event):
-					self.obj_clicked.add(obj)
+					if not self.to_click_up:
+						self.obj_clicked.add(obj)
 					return
 		
 	def click_up_handler(self , event):
@@ -266,17 +264,20 @@ class Scene:
 			if obj.click_up(event):
 				self.obj_clicked.clear()
 				return
-		
-		
-		
+
 		# loops if objects in self.to_click_up
-		for c_list in self.to_click_up:
-			for obj in c_list:
-				if obj.click_up(event):
-					return
+		if self.to_click_up:
+			for c_list in self.to_click_up:
+				for obj in c_list:
+					obj.click_up(event)
+
+
+		# loops from self.obj_clicked
+		else:
+			for c_list in self.to_click_down:
+				for obj in c_list:
+					obj.click_up(event)
 				
-		
-		
 	def multi_gesture_handler(self , event):
 		"""
 		Default multi_gesture_handler.
@@ -354,30 +355,11 @@ class Scene:
 		for c_list in self.to_draw:
 			for obj in c_list:
 				obj.draw(self.screen)
-				
-		#txt = pg.Surface(500,500).convert_alpha()
-		
 
 	def stop(self):
 		self.running = False
 
-class PauseMenu(Scene):
-	def draw_handler(self):
-		"""
-		Default draw handler.
-		
-		Loops throught self.to_draw and 
-		calls --> obj.draw(self.screen)
-		
-		It fills the screen with the self.background color.
-		Than draws the things, then updates the display.
-		"""
-		
-		#self.screen.fill(self.background)
-		for c_list in self.to_draw:
-			for obj in c_list:
-				obj.draw(self.screen) 
-				
+
 class EditScene(Scene):
 	
 	
@@ -424,28 +406,15 @@ class EditScene(Scene):
 				obj.move()
 
 
-class CreateWayScene(Scene):
-	pos = []
-	def click_down_handler(self , event):
-		self.pos.append(event.pos)
-		print(f"{self.pos},")
-	
-	def draw_handler(self):
-		self.screen.fill(self.background)
-		for pos in self.pos:
-			#print(pos)
-			pg.draw.circle(self.screen , "green2" , pos , 50)
-
-
 class Canvas:
 	def __init__(self):
 		self.points = set()
-	
+
 	def finger_down(self , event):
 		pos_x = event.x*screen_rect.w
 		pos_y = event.y*screen_rect.h
 		self.points.add((pos_x , pos_y))
-	
+
 	def finger_up(self , event):
 		pos_x = event.x*screen_rect.w
 		pos_y = event.y*screen_rect.h
@@ -457,7 +426,7 @@ class Canvas:
 		for pt in to_remove:
 			self.points.discard(pt)
 		return
-		
+
 	def draw(self , screen_to_draw):
 		for x , y in self.points:
 			pg.draw.line(screen_to_draw , "red" , (x , 0) , (x,screen_rect.h) , 6)

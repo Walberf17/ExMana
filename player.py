@@ -212,10 +212,12 @@ class Player(Character):
 		"""
 		center = pg.Vector2(pg.mouse.get_pos())
 		for obj in items_group:
-			if type(size) in (int , float):
+			if obj.check_can_be_taken():
+				if type(size) in (int , float):
 					if center.distance_to(obj.rect.center) <= int(size):
 						obj.get_me(self.main_deck)
-			elif type(size) in [list , tuple] and len(size) == 2:
+
+				elif type(size) in [list , tuple] and len(size) == 2:
 					effect_rect = pg.Rect((0 , 0) , size)
 					effect_rect.center = center
 					if obj.rect.colliderect(effect_rect):

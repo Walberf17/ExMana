@@ -95,7 +95,6 @@ class NPC(Character):
 		else:
 			self.talk()
 
-
 	def give_quest_to_player(self , player):
 		"""
 		Give a quest to the player, then set it as given, and remove it from its list

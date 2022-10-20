@@ -10,7 +10,7 @@ from animations import Animations
 from moving_object import MovingObj
 from definitions import *
 from deck_and_cards_info import *
-from images_info import CARDS_IMAGES
+from animations_info import CARDS_IMAGES
 
 
 
@@ -133,7 +133,7 @@ class Card(Animations , MovingObj):
 	"""
 	def __init__(self, idx , deck , player , groups = None):
 		MovingObj.__init__(self)
-		Animations.__init__(self , images_idx = idx , area = (1,1.4) , dict_with_images = CARDS_IMAGES , rect_to_be = screen_rect , pos = (random.randint( 1 , screen_rect.w) , screen_rect.h*.95) , groups = groups)
+		Animations.__init__(self , images_name = idx , area = (1,1.4) , dict_with_images = CARDS_IMAGES , rect_to_be = screen_rect , pos = (random.randint( 1 , screen_rect.w) , screen_rect.h*.95) , groups = groups)
 		this_dict = CARDS_DICT.get(idx)
 		if self.images:
 			self.close_up_image = pg.transform.scale(self.original_images , [self.rect.w * 3 , self.rect.h * 3])
@@ -176,13 +176,14 @@ class Card(Animations , MovingObj):
 		"""
 		if self.clicked:
 			self.clicked = False
-			click_up = pg.mouse.get_pos()
-			if self.deck.map_rect.collidepoint(click_up):
+			click_up_pos = pg.mouse.get_pos()
+			if self.deck.map_rect.collidepoint(click_up_pos):
 				if self.player.check_in_range(self.melee):
 					if self.player.check_cost(self.cost):
 						self.kill()
 						if self.kind in self.player.get_animated_actions():
-							self.player.set_action(self , click_up)
+							self.player.set_action(self , click_up_pos)
+							print('set action')
 						else:
 							self.do_action()
 			return True

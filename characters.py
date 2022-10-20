@@ -4,7 +4,7 @@ This is a internal class, a class that will be a base for other.
 This class will create a character and give it default actions.
 """
 import random
-from images_info import CHARACTER_IMAGES_DICT
+from animations_info import CHARACTER_IMAGES_DICT
 from items_info import *
 from variables import *
 from definitions import *
@@ -53,7 +53,7 @@ class Character(Animations , MovingObj):
 			self.effects = loaded_dict.get('effects')
 			self.abnormal_effects = loaded_dict.get('abnormal_effects')
 			rect_center = loaded_dict.get('rect_center')
-			Animations.__init__(self , images_idx = self.images_idx , area = [self.default_width , self.default_height] ,
+			Animations.__init__(self , images_name = self.images_idx , area = [self.default_width , self.default_height] ,
 			                    dict_with_images = dict_with_images , rect_to_be = rect_to_be , pos = pos ,
 			                    groups = groups)
 			if rect_center is not None:
@@ -62,7 +62,7 @@ class Character(Animations , MovingObj):
 		else:
 			self.default_height = random.randrange(160 , 210) / 100
 			self.default_width = random.randrange(30 , 60) / 100
-			Animations.__init__(self , images_idx = self.images_idx , area = [self.default_width , self.default_height] ,
+			Animations.__init__(self , images_name = self.images_idx , area = [self.default_width , self.default_height] ,
 			                    dict_with_images = dict_with_images , rect_to_be = rect_to_be , pos = pos ,
 			                    relative_pos = relative_pos , groups = groups)
 			sight = [5 , 10]
@@ -227,6 +227,36 @@ class Character(Animations , MovingObj):
 
 	def kill(self):
 		Animations.kill(self)
+
+	def add_to_bag(self , item_index , quantity):
+		"""
+		Add that many items to the bag
+		:param item_index: item index in ITEMS_INFO_DICT
+		:param quantity: how many item in the operation
+		:return: None
+		"""
+		self.bag[item_index] += quantity
+
+	def take_from_bag(self , item_index , quantity = 1):
+		"""
+		Remove that many items to the bag
+		:param item_index: item index in ITEMS_INFO_DICT
+		:param quantity: how many item in the operation
+		:return: None
+		"""
+		if self.has_item(item_index , quantity):
+			self.bag[item_index] -= quantity
+			return True
+		return False
+
+	def has_item(self , item_index , quantity = 1):
+		"""
+		Check if it has that many items in the bag
+		:param item_index: item index in ITEMS_INFO_DICT
+		:param quantity: how many item in the operation
+		:return: Boolean if it has at least that quantity
+		"""
+		return self.bag[item_index] >= quantity
 
 	# change Default Status
 
